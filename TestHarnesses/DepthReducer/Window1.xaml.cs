@@ -1,5 +1,6 @@
 ﻿namespace DepthReducer
 {
+    using System;
     using System.Linq;
     using System.Reflection;
     using System.Windows;
@@ -28,14 +29,16 @@
             for (i = 0; i < count - 1; ++i)
             {
                 b.Padding = padding;
-                b.Background = (Brush)info[i].GetValue(null, null);
+                b.Background = (Brush)info[i].GetValue(null, null)!;
                 Border b2 = new();
+#pragma warning disable CA1307
                 b2.Name = "border_" + i + "_" + b.Background.ToString().Replace("#", string.Empty);
+#pragma warning restore CA1307
                 b.Child = b2;
                 b = b2;
             }
 
-            b.Background = (Brush)info[i].GetValue(null, null);
+            b.Background = (Brush)info[i].GetValue(null, null)!;
         }
     }
 }

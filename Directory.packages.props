@@ -5,7 +5,7 @@
 
     <ItemGroup Label="PowerShell">
         <PackageVersion Include="microsoft.powershell.3.referenceassemblies" Version="1.0.0" Condition="'$(TargetFramework)' == '$(MinTargetFramework)'" />
-        <PackageVersion Include="System.Management.Automation" Version="7.2.0" Condition="'$(TargetFramework)' == 'net6.0-windows'" />
+        <PackageVersion Include="System.Management.Automation" Version="7.2.0" Condition="'$(TargetFramework)' != '$(MinTargetFramework)'" />
     </ItemGroup>
 
     <ItemGroup Label="Test">

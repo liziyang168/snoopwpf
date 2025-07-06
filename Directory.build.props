@@ -10,6 +10,7 @@
     -->
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <MinTargetFramework>net462</MinTargetFramework>
+    <MinCoreTargetFramework>net6.0-windows</MinCoreTargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
