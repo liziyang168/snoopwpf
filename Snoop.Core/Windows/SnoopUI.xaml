@@ -154,6 +154,22 @@
                               IsEnabled="{Binding ElementName=CtrlShiftMenuItem, Path=IsChecked}"
                               ToolTip="When enabled: CTRL + SHIFT also selects UI elements that are have IsHitTestVisible set to false" />
                     <Separator />
+                    <MenuItem x:Name="AutoTrackMenuItem"
+                              Header="_Auto-track on click"
+                              IsCheckable="True"
+                              IsChecked="{Binding IsAutoTrackingOnClick}"
+                              ToolTip="When enabled, automatically tracks UI elements when clicked without needing CTRL + SHIFT." />
+                    <MenuItem Header="Skip template parts (auto-track)"
+                              IsCheckable="True"
+                              IsChecked="{Binding SkipTemplatePartsAutoTrack}"
+                              IsEnabled="{Binding ElementName=AutoTrackMenuItem, Path=IsChecked}"
+                              ToolTip="When enabled: auto-track tries to skip template parts." />
+                    <MenuItem Header="Auto-track selects hit test invisible"
+                              IsCheckable="True"
+                              IsChecked="{Binding IgnoreHitTestVisibilityAutoTrack}"
+                              IsEnabled="{Binding ElementName=AutoTrackMenuItem, Path=IsChecked}"
+                              ToolTip="When enabled: auto-track also selects UI elements that have IsHitTestVisible set to false" />
+                    <Separator />
                     <MenuItem Header="Highlight selected item"
                               IsCheckable="True"
                               IsChecked="{Binding HighlightSelectedItem, Source={x:Static selectionHighlight:SelectionHighlightOptions.Default}}" />
