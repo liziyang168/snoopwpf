@@ -83,6 +83,9 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
         InputManager.Current.PreProcessInput += this.HandlePreProcessInput;
         this.Tree.SelectedItemChanged += this.HandleTreeSelectedItemChanged;
 
+        // Add mouse event handler for auto-tracking
+        InputManager.Current.PreProcessInput += this.HandleMouseClickForAutoTrack;
+
         this.filterTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(0.3)
@@ -324,6 +327,12 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
     // ReSharper disable once InconsistentNaming
     public bool SkipTemplateParts { get; set; } = false;
+
+    public bool IsAutoTrackingOnClick { get; set; } = false;
+
+    public bool SkipTemplatePartsAutoTrack { get; set; } = false;
+
+    public bool IgnoreHitTestVisibilityAutoTrack { get; set; } = true;
 
     /// <summary>Identifies the <see cref="CurrentTreeType"/> dependency property.</summary>
     public static readonly DependencyProperty CurrentTreeTypeProperty = DependencyProperty.Register(nameof(CurrentTreeType), typeof(TreeType), typeof(SnoopUI), new PropertyMetadata(TreeType.Visual, OnCurrentTreeTypeChanged));
@@ -665,6 +674,56 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
         // If template parts should be skipped search up the tree of templated parents.
         if (this.SkipTemplateParts
+            && itemToFind is FrameworkElement frameworkElement)
+        {
+            itemToFind = GetItemToFindAndSkipTemplateParts(frameworkElement);
+        }
+
+        var node = this.FindItem(itemToFind);
+        if (node is not null
+            && ReferenceEquals(this.CurrentSelection, node) == false)
+        {
+            this.CurrentSelection = node;
+        }
+    }
+
+    private void HandleMouseClickForAutoTrack(object sender, PreProcessInputEventArgs e)
+    {
+        if (this.IsAutoTrackingOnClick == false)
+        {
+            return;
+        }
+
+        // Check if this is a mouse button down event
+        if (e.StagingItem.Input is not MouseButtonEventArgs mouseArgs
+            || mouseArgs.RoutedEvent != Mouse.MouseDownEvent
+            || mouseArgs.ChangedButton != MouseButton.Left)
+        {
+            return;
+        }
+
+        // Check if Ctrl+Shift is being pressed (if so, let the normal handler take care of it)
+        var currentModifiers = InputManager.Current.PrimaryKeyboardDevice.Modifiers;
+        var isControlPressed = currentModifiers.HasFlag(ModifierKeys.Control);
+        var isShiftPressed = currentModifiers.HasFlag(ModifierKeys.Shift);
+
+        if (isControlPressed && isShiftPressed)
+        {
+            return; // Let the normal CTRL+SHIFT handler take care of this
+        }
+
+        var itemToFind = Mouse.PrimaryDevice.GetDirectlyOver(this.IgnoreHitTestVisibilityAutoTrack);
+
+        switch (itemToFind)
+        {
+            case null:
+            case var dependencyObject when dependencyObject.IsPartOfSnoopVisualTree():
+            case Visual visual when visual.IsDescendantOf(this):
+                return;
+        }
+
+        // If template parts should be skipped search up the tree of templated parents.
+        if (this.SkipTemplatePartsAutoTrack
             && itemToFind is FrameworkElement frameworkElement)
         {
             itemToFind = GetItemToFindAndSkipTemplateParts(frameworkElement);
