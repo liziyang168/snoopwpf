@@ -80,11 +80,8 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
         this.CommandBindings.Add(new CommandBinding(CopyPropertyChangesCommand, this.CopyPropertyChangesHandler));
 
-        InputManager.Current.PreProcessInput += this.HandlePreProcessInput;
+        InputManager.Current.PreProcessInput += this.HandlePreProcessInputForTracking;
         this.Tree.SelectedItemChanged += this.HandleTreeSelectedItemChanged;
-
-        // Add mouse event handler for auto-tracking
-        InputManager.Current.PreProcessInput += this.HandleMouseClickForAutoTrack;
 
         this.filterTimer = new DispatcherTimer
         {
@@ -320,19 +317,13 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
     #endregion
 
-    // ReSharper disable once InconsistentNaming
-    public bool IsHandlingCTRL_SHIFT { get; set; } = true;
+    public bool TrackOnMouseMove { get; set; } = true;
+
+    public bool TrackOnClick { get; set; } = false;
 
     public bool IgnoreHitTestVisibility { get; set; } = true;
 
-    // ReSharper disable once InconsistentNaming
     public bool SkipTemplateParts { get; set; } = false;
-
-    public bool IsAutoTrackingOnClick { get; set; } = false;
-
-    public bool SkipTemplatePartsAutoTrack { get; set; } = false;
-
-    public bool IgnoreHitTestVisibilityAutoTrack { get; set; } = true;
 
     /// <summary>Identifies the <see cref="CurrentTreeType"/> dependency property.</summary>
     public static readonly DependencyProperty CurrentTreeTypeProperty = DependencyProperty.Register(nameof(CurrentTreeType), typeof(TreeType), typeof(SnoopUI), new PropertyMetadata(TreeType.Visual, OnCurrentTreeTypeChanged));
@@ -441,7 +432,7 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
         CacheManager.Instance.DecreaseUsageCount();
 
-        InputManager.Current.PreProcessInput -= this.HandlePreProcessInput;
+        InputManager.Current.PreProcessInput -= this.HandlePreProcessInputForTracking;
 
         this.filterTimer.Stop();
 
@@ -642,22 +633,43 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
     #region Private Event Handlers
 
-    private void HandlePreProcessInput(object sender, PreProcessInputEventArgs e)
+    private bool IsTrackingInput(PreProcessInputEventArgs e)
+    {
+        // "Track on click"
+        if (this.TrackOnClick
+            && e.StagingItem.Input is MouseButtonEventArgs mouseButtonEventArgs
+            && mouseButtonEventArgs.RoutedEvent == Mouse.PreviewMouseDownEvent
+            && mouseButtonEventArgs.ChangedButton is MouseButton.Left)
+        {
+            return true;
+        }
+
+        // "Track on mouse move"
+        if (this.TrackOnMouseMove
+            && ((e.StagingItem.Input is MouseEventArgs mouseEventArgs
+                && mouseEventArgs.RoutedEvent == Mouse.PreviewMouseMoveEvent)
+            // in addition to mouse movements we have to handle cases where the user just hovers over an element and then presses CTRL + SHIFT
+            || (e.StagingItem.Input is KeyEventArgs keyEventArgs
+                && keyEventArgs.RoutedEvent == Keyboard.PreviewKeyDownEvent
+                && keyEventArgs.Key is Key.LeftCtrl or Key.RightCtrl or Key.LeftShift or Key.RightShift)))
+        {
+            var currentModifiers = InputManager.Current.PrimaryKeyboardDevice.Modifiers;
+
+            var isControlPressed = currentModifiers.HasFlag(ModifierKeys.Control);
+            var isShiftPressed = currentModifiers.HasFlag(ModifierKeys.Shift);
+
+            return isControlPressed is true
+                   && isShiftPressed is true;
+        }
+
+        return false;
+    }
+
+    private void HandlePreProcessInputForTracking(object sender, PreProcessInputEventArgs e)
     {
         this.OnPropertyChanged(nameof(this.CurrentFocus));
 
-        if (this.IsHandlingCTRL_SHIFT == false)
-        {
-            return;
-        }
-
-        var currentModifiers = InputManager.Current.PrimaryKeyboardDevice.Modifiers;
-
-        var isControlPressed = currentModifiers.HasFlag(ModifierKeys.Control);
-        var isShiftPressed = currentModifiers.HasFlag(ModifierKeys.Shift);
-
-        if (isControlPressed == false
-            || isShiftPressed == false)
+        if (this.IsTrackingInput(e) is false)
         {
             return;
         }
@@ -674,56 +686,6 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
         // If template parts should be skipped search up the tree of templated parents.
         if (this.SkipTemplateParts
-            && itemToFind is FrameworkElement frameworkElement)
-        {
-            itemToFind = GetItemToFindAndSkipTemplateParts(frameworkElement);
-        }
-
-        var node = this.FindItem(itemToFind);
-        if (node is not null
-            && ReferenceEquals(this.CurrentSelection, node) == false)
-        {
-            this.CurrentSelection = node;
-        }
-    }
-
-    private void HandleMouseClickForAutoTrack(object sender, PreProcessInputEventArgs e)
-    {
-        if (this.IsAutoTrackingOnClick == false)
-        {
-            return;
-        }
-
-        // Check if this is a mouse button down event
-        if (e.StagingItem.Input is not MouseButtonEventArgs mouseArgs
-            || mouseArgs.RoutedEvent != Mouse.MouseDownEvent
-            || mouseArgs.ChangedButton != MouseButton.Left)
-        {
-            return;
-        }
-
-        // Check if Ctrl+Shift is being pressed (if so, let the normal handler take care of it)
-        var currentModifiers = InputManager.Current.PrimaryKeyboardDevice.Modifiers;
-        var isControlPressed = currentModifiers.HasFlag(ModifierKeys.Control);
-        var isShiftPressed = currentModifiers.HasFlag(ModifierKeys.Shift);
-
-        if (isControlPressed && isShiftPressed)
-        {
-            return; // Let the normal CTRL+SHIFT handler take care of this
-        }
-
-        var itemToFind = Mouse.PrimaryDevice.GetDirectlyOver(this.IgnoreHitTestVisibilityAutoTrack);
-
-        switch (itemToFind)
-        {
-            case null:
-            case var dependencyObject when dependencyObject.IsPartOfSnoopVisualTree():
-            case Visual visual when visual.IsDescendantOf(this):
-                return;
-        }
-
-        // If template parts should be skipped search up the tree of templated parents.
-        if (this.SkipTemplatePartsAutoTrack
             && itemToFind is FrameworkElement frameworkElement)
         {
             itemToFind = GetItemToFindAndSkipTemplateParts(frameworkElement);
