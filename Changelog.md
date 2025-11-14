@@ -6,6 +6,7 @@
 
   - [#477](../../issues/477) - Binding Errors - Get error message
   - [#483](../../issues/483) - Error when I try to GetBindingExpression from TextProperty
+  - [#484](../../issues/484) - Snoop fails to attach to application running on .NET Framework on ARM64
 
 - ### Improvements
 
