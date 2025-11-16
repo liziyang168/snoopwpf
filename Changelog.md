@@ -12,6 +12,7 @@
 
   - [#457](../../issues/457) - [Quality of Life] Synchronize Zoomer instance background slider value.
   - [#482](../../issues/482) - Add "Auto-track on click" option (thanks @Koichi-Kobayashi)
+  - [#485](../../issues/485) - Snoop running on ARM hardware is using x64 emulation instead of the native Arm64
 
 ## 6.0.0
 

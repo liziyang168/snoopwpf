@@ -9,6 +9,9 @@
     See: https://docs.microsoft.com/en-us/dotnet/standard/assembly/reference-assemblies
     -->
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PreferNativeArm64>True</PreferNativeArm64>
     <MinTargetFramework>net462</MinTargetFramework>
     <MinCoreTargetFramework>net6.0-windows</MinCoreTargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
