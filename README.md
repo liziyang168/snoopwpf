@@ -26,7 +26,7 @@ You can change property values, view triggers, set breakpoints on property chang
 
 - .NET Framework >= 4.6.2
 - .NET >= 6
-  - Tested with 6, 7 and 8. Future versions might just work.
+  - Tested with 6, 7, 8, 9 and 10. Future versions might just work.
   - **Restrictions:** Self-Contained single file applications are not supported as there is no reliable way to get a handle to the .NET runtime
 
 ## Versions
@@ -147,10 +147,10 @@ Just open `Snoop.sln` with Visual Studio and build it.
 
 Requirements:
 
-- Visual Studio 2022
+- Visual Studio 2022 or later
   - C++ payloads (x86/x64 and optionally ARM/ARM64)
   - You can import the [.vsconfig](.vsconfig) file in the Visual Studio installer to let it install all required components
-- .NET SDK 8.0.100 or later
+- .NET SDK 8.0.401 or later
 
 ## Contributors
 
