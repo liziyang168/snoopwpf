@@ -224,15 +224,15 @@ public class BindingLeakDiagnosticProvider : DiagnosticProvider
             return HashCode.Combine(this.TypeName, this.PropertyName);
         }
 #else
-            public override int GetHashCode()
+        public override int GetHashCode()
+        {
+            unchecked
             {
-                unchecked
-                {
-                    var hashCode = this.TypeName.GetHashCode();
-                    hashCode = (hashCode * 397) ^ this.PropertyName.GetHashCode();
-                    return hashCode;
-                }
+                var hashCode = this.TypeName.GetHashCode();
+                hashCode = (hashCode * 397) ^ this.PropertyName.GetHashCode();
+                return hashCode;
             }
+        }
 #endif
     }
 }
