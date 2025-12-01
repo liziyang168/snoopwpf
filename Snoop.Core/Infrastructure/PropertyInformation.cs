@@ -704,10 +704,10 @@ public class PropertyInformation : DependencyObject, IComparable, INotifyPropert
                     this.isInvalidBinding = true;
 
 #if USE_WPF_BINDING_DIAG
-                        if (BindingDiagnosticHelper.Instance.TryGetEntry(expression, out var failedBinding))
-                        {
-                            this.BindingError = failedBinding.Messages;
-                        }
+                    if (BindingDiagnosticHelper.Instance.TryGetEntry(expression, out var failedBinding))
+                    {
+                        this.BindingError = failedBinding.Messages;
+                    }
 #endif
                 }
             }
