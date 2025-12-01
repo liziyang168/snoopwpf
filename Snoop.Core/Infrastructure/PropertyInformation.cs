@@ -112,7 +112,11 @@ public class PropertyInformation : DependencyObject, IComparable, INotifyPropert
 
         BindingMode GetBindingMode()
         {
-            return property.IsReadOnly ? BindingMode.OneWay : BindingMode.TwoWay;
+            var targetSupportsNotifications = target is INotifyPropertyChanged;
+
+            return property.IsReadOnly
+                ? targetSupportsNotifications ? BindingMode.OneWay : BindingMode.OneTime
+                : BindingMode.TwoWay;
         }
     }
 
