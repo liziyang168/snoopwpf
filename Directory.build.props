@@ -1,70 +1,70 @@
 ﻿<Project>
-  <PropertyGroup>
-    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-    <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
-    <!-- 
-    Turns off reference assembly generation 
-    See: https://docs.microsoft.com/en-us/dotnet/standard/assembly/reference-assemblies
-    -->
-    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <PropertyGroup>
+        <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+        <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
+        <!-- 
+        Turns off reference assembly generation 
+        See: https://docs.microsoft.com/en-us/dotnet/standard/assembly/reference-assemblies
+        -->
+        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <PreferNativeArm64>True</PreferNativeArm64>
-    <MinTargetFramework>net462</MinTargetFramework>
-    <MinCoreTargetFramework>net6.0-windows</MinCoreTargetFramework>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
-    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-  </PropertyGroup>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <PreferNativeArm64 Condition="'$(TargetFramework)' == '$(MinTargetFramework)'">True</PreferNativeArm64>
+        <MinTargetFramework>net462</MinTargetFramework>
+        <MinCoreTargetFramework>net6.0-windows</MinCoreTargetFramework>
+        <CheckEolTargetFramework>false</CheckEolTargetFramework>
+        <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <OutputPath>$(MSBuildThisFileDirectory)\bin\$(Configuration)\</OutputPath>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputPath>$(MSBuildThisFileDirectory)\bin\$(Configuration)\</OutputPath>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <LangVersion>10</LangVersion>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <Nullable>enable</Nullable>
-    <NoWarn>$(NoWarn);NU1503;NETSDK1138;MSB3277;CA1021;CA1063;CA1816</NoWarn>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
-  </PropertyGroup>
+    <PropertyGroup>
+        <LangVersion>10</LangVersion>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Nullable>enable</Nullable>
+        <NoWarn>$(NoWarn);NU1503;NETSDK1138;MSB3277;CA1021;CA1063;CA1816</NoWarn>
+        <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/Snoop.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+    <PropertyGroup>
+        <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/Snoop.ruleset</CodeAnalysisRuleSet>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
-    <AutoGenerateBindingRedirects Condition="$(DefineConstants.Contains(NETCOREAPP)) == false">true</AutoGenerateBindingRedirects>
-  </PropertyGroup>
-  
-  <!-- Assembly info -->
-  <PropertyGroup>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <PropertyGroup>
+        <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+        <AutoGenerateBindingRedirects Condition="'$(TargetFramework)' == '$(MinTargetFramework)'">true</AutoGenerateBindingRedirects>
+    </PropertyGroup>
 
-    <Company>https://github.com/snoopwpf/snoopwpf</Company>
-    <Product>Snoop</Product>
-    <Copyright>Copyright © Cory Plotts, Bastian Schmidt 2010 - $([System.DateTime]::Today.ToString(yyyy))</Copyright>
-  </PropertyGroup>
+    <!-- Assembly info -->
+    <PropertyGroup>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 
-  <!-- SourceLink -->
-  <PropertyGroup>
-    <!-- Optional: Declare that the Repository URL can be published to NuSpec -->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <!-- Optional: Embed source files that are not tracked by the source control manager to the PDB -->
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <!-- Optional: Include PDB in the built .nupkg -->
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <!-- By using EmbedAllSources we don't need SourceLink itself -->
-    <!-- https://github.com/dotnet/sourcelink/blob/master/docs/README.md#embedallsources -->
-    <EmbedAllSources>True</EmbedAllSources>
-  </PropertyGroup>
+        <Company>https://github.com/snoopwpf/snoopwpf</Company>
+        <Product>Snoop</Product>
+        <Copyright>Copyright © Cory Plotts, Bastian Schmidt 2010 - $([System.DateTime]::Today.ToString(yyyy))</Copyright>
+    </PropertyGroup>
 
-  <!-- PDB-Options -->
-  <PropertyGroup>
-    <!-- We should switch "DebugType" to "portable" in the future -->
-    <!-- "Full" and "pdbonly" are the same according to https://github.com/dotnet/roslyn/blob/master/docs/compilers/CSharp/CommandLine.md -->
-    <DebugType>full</DebugType>
-  </PropertyGroup>
+    <!-- SourceLink -->
+    <PropertyGroup>
+        <!-- Optional: Declare that the Repository URL can be published to NuSpec -->
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <!-- Optional: Embed source files that are not tracked by the source control manager to the PDB -->
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <!-- Optional: Include PDB in the built .nupkg -->
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+        <!-- By using EmbedAllSources we don't need SourceLink itself -->
+        <!-- https://github.com/dotnet/sourcelink/blob/master/docs/README.md#embedallsources -->
+        <EmbedAllSources>True</EmbedAllSources>
+    </PropertyGroup>
+
+    <!-- PDB-Options -->
+    <PropertyGroup>
+        <!-- We should switch "DebugType" to "portable" in the future -->
+        <!-- "Full" and "pdbonly" are the same according to https://github.com/dotnet/roslyn/blob/master/docs/compilers/CSharp/CommandLine.md -->
+        <DebugType>full</DebugType>
+    </PropertyGroup>
 </Project>
