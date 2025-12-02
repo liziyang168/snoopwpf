@@ -35,8 +35,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
-        <AutoGenerateBindingRedirects Condition="'$(TargetFramework)' == '$(MinTargetFramework)'">true</AutoGenerateBindingRedirects>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     </PropertyGroup>
 
     <!-- Assembly info -->
