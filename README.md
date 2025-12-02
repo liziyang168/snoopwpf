@@ -150,7 +150,7 @@ Requirements:
 - Visual Studio 2022 or later
   - C++ payloads (x86/x64 and optionally ARM/ARM64)
   - You can import the [.vsconfig](.vsconfig) file in the Visual Studio installer to let it install all required components
-- .NET SDK 8.0.401 or later
+- .NET SDK 10.0.100 or later
 
 ## Contributors
 
