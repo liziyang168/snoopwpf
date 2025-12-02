@@ -93,6 +93,9 @@
                     <TextBlock Text="Select which diagnostic providers should be active." />
                 </controls:NoSelectionComboBox.ToolTip>
             </controls:NoSelectionComboBox>
+
+            <Button Click="ButtonBase_OnClick"
+                    Content="Export" />
         </StackPanel>
 
         <ListView x:Name="diagnostics"

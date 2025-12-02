@@ -1,14 +1,18 @@
-namespace Snoop.Views;
+﻿namespace Snoop.Views;
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Xml.Serialization;
+using JetBrains.Annotations;
+using Snoop.Data.Tree;
 using Snoop.Infrastructure.Diagnostics;
 
 public partial class DiagnosticsView
@@ -238,6 +242,73 @@ public partial class DiagnosticsView
         if (diagnosticItem?.TreeItem != null)
         {
             diagnosticItem.TreeItem.IsSelected = true;
+        }
+    }
+
+    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+    {
+        var diagnosticItems = this.DiagnosticsItemsView?.Cast<DiagnosticItem>()
+            .Select(x => new DiagnosticItemData(x.Area, x.Level, x.Name, x.Description, x.SourceObject?.ToString(), TreeItemDiagnosticPathData.Build(x.TreeItem)))
+            .ToList();
+
+        if (diagnosticItems is not null)
+        {
+            var targetFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "SnoopTreeExport");
+            new XmlSerializer(typeof(List<DiagnosticItemData>)).Serialize(File.CreateText(Path.Combine(targetFolder, "diagnostics.xml")), diagnosticItems);
+        }
+    }
+
+    [PublicAPI]
+    public record DiagnosticItemData(DiagnosticArea Area, DiagnosticLevel Level, string Name, string Description, string? SourceObject, List<TreeItemDiagnosticPathData>? TreeItemPath)
+    {
+        public DiagnosticItemData()
+            : this(DiagnosticArea.Misc, DiagnosticLevel.Info, string.Empty, string.Empty, null, null)
+        {
+        }
+
+        public DiagnosticArea Area { get; set; } = Area;
+
+        public DiagnosticLevel Level { get; set; } = Level;
+
+        public string Name { get; set; } = Name;
+
+        public string Description { get; set; } = Description;
+
+        public string? SourceObject { get; set; } = SourceObject;
+
+        public List<TreeItemDiagnosticPathData>? TreeItemPath { get; set; } = TreeItemPath;
+    }
+
+    [PublicAPI]
+    public record TreeItemDiagnosticPathData(string DisplayName, string TypeName)
+    {
+        public TreeItemDiagnosticPathData()
+            : this(string.Empty, string.Empty)
+        {
+        }
+
+        public string DisplayName { get; set; } = DisplayName;
+
+        public string TypeName { get; set; } = TypeName;
+
+        public static List<TreeItemDiagnosticPathData>? Build(TreeItem? treeItem)
+        {
+            if (treeItem is null)
+            {
+                return null;
+            }
+
+            var items = new List<TreeItemDiagnosticPathData>();
+
+            var current = treeItem;
+            while (current is not null)
+            {
+                items.Add(new(treeItem.DisplayName, treeItem.TargetType.Name));
+                current = current.Parent;
+            }
+
+            items.Reverse();
+            return items;
         }
     }
 }
