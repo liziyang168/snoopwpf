@@ -11,7 +11,7 @@
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 
         <PlatformTarget>AnyCPU</PlatformTarget>
-        <PreferNativeArm64 Condition="'$(TargetFramework)' == '$(MinTargetFramework)'">True</PreferNativeArm64>
+        <PreferNativeArm64>True</PreferNativeArm64>
         <MinTargetFramework>net462</MinTargetFramework>
         <MinCoreTargetFramework>net6.0-windows</MinCoreTargetFramework>
         <CheckEolTargetFramework>false</CheckEolTargetFramework>
@@ -26,7 +26,7 @@
         <LangVersion>10</LangVersion>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <Nullable>enable</Nullable>
-        <NoWarn>$(NoWarn);NU1503;NETSDK1138;MSB3277;CA1021;CA1063;CA1816</NoWarn>
+        <NoWarn>$(NoWarn);NU1503;NETSDK1138;NETSDK1222;MSB3277;CA1021;CA1063;CA1816</NoWarn>
         <CheckEolTargetFramework>false</CheckEolTargetFramework>
     </PropertyGroup>
 
