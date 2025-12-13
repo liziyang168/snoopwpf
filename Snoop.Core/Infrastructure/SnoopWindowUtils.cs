@@ -6,10 +6,11 @@
 namespace Snoop.Infrastructure;
 
 using System;
-using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Forms;
 using System.Windows.Interop;
+using global::Windows.Win32;
+using global::Windows.Win32.Graphics.Gdi;
 using Snoop.Data;
 using Snoop.Infrastructure.Helpers;
 using Application = System.Windows.Application;
@@ -122,20 +123,20 @@ public static class SnoopWindowUtils
         {
             if (windowPlacementValue.NormalPosition.Width is not 0
                      && windowPlacementValue.NormalPosition.Height is not 0
-                     && IsVisibleOnAnyScreen(windowPlacementValue.NormalPosition, out var screen))
+                     && IsVisibleOnAnyScreen(windowPlacementValue.NormalPosition, out var screenBounds))
             {
-                var screenContainsPosition = screen.Bounds.Contains(windowPlacement.Value.NormalPosition.Left, windowPlacement.Value.NormalPosition.Top);
+                var screenContainsPosition = screenBounds.Contains(windowPlacement.Value.NormalPosition.Left, windowPlacement.Value.NormalPosition.Top);
                 var hwnd = new WindowInteropHelper(window).Handle;
                 var logicalScreenPosition = DPIHelper.DevicePixelsToLogical(new Point(windowPlacement.Value.NormalPosition.Left, windowPlacement.Value.NormalPosition.Top), hwnd);
-                window.Top = screenContainsPosition ? logicalScreenPosition.Y : screen.Bounds.Top;
-                window.Left = screenContainsPosition ? logicalScreenPosition.X : screen.Bounds.Left;
+                window.Top = screenContainsPosition ? logicalScreenPosition.Y : screenBounds.Top;
+                window.Left = screenContainsPosition ? logicalScreenPosition.X : screenBounds.Left;
                 var logicalWindowSize = DPIHelper.DevicePixelsToLogical(new Point(windowPlacement.Value.NormalPosition.Width, windowPlacement.Value.NormalPosition.Height), hwnd);
-                var logicalScreenSize = DPIHelper.DevicePixelsToLogical(new Point(screen.Bounds.Width, screen.Bounds.Height), hwnd);
+                var logicalScreenSize = DPIHelper.DevicePixelsToLogical(new Point(screenBounds.Width, screenBounds.Height), hwnd);
                 window.Width = Math.Max(100, Math.Min(logicalScreenSize.X, logicalWindowSize.X));
                 window.Height = Math.Max(26, Math.Min(logicalScreenSize.Y, logicalWindowSize.Y));
             }
 
-            if (windowPlacementValue.ShowCmd == NativeMethods.SW_SHOWMAXIMIZED)
+            if (windowPlacementValue.ShowCmd is NativeMethods.SW_SHOWMAXIMIZED)
             {
                 window.WindowState = WindowState.Maximized;
             }
@@ -154,37 +155,27 @@ public static class SnoopWindowUtils
         saveAction(windowPlacement);
     }
 
-    private static bool IsVisibleOnAnyScreen(RECT rect, [NotNullWhen(true)] out Screen? screenResult)
+    private static bool IsVisibleOnAnyScreen(RECT rect, out Rectangle screenBounds)
     {
+        screenBounds = Rectangle.Empty;
+
         var rectangle = new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height);
 
-        foreach (var screen in Screen.AllScreens)
+        global::Windows.Win32.Foundation.RECT apiRect = new global::Windows.Win32.Foundation.RECT(rectangle);
+
+        var monitor = PInvoke.MonitorFromRect(apiRect, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONULL);
+        if (monitor == HMONITOR.Null)
         {
-            if (screen.Bounds.Contains(rectangle))
-            {
-                screenResult = screen;
-                return true;
-            }
+            return false;
         }
 
-        var largestIntersectRectAndScreen = new Tuple<Rectangle, Screen?>(Rectangle.Empty, null);
-
-        foreach (var screen in Screen.AllScreens)
+        MONITORINFO monitorInfo = new MONITORINFO { cbSize = (uint)Marshal.SizeOf<MONITORINFO>() };
+        if (PInvoke.GetMonitorInfo(monitor, ref monitorInfo) == false)
         {
-            var intersectRect = Rectangle.Intersect(screen.Bounds, rectangle);
-            if ((intersectRect.Width * intersectRect.Height) > (largestIntersectRectAndScreen.Item1.Width * largestIntersectRectAndScreen.Item1.Height))
-            {
-                largestIntersectRectAndScreen = new Tuple<Rectangle, Screen?>(intersectRect, screen);
-            }
+            return false;
         }
 
-        if (largestIntersectRectAndScreen.Item2 is not null)
-        {
-            screenResult = largestIntersectRectAndScreen.Item2;
-            return true;
-        }
-
-        screenResult = null;
-        return false;
+        screenBounds = monitorInfo.rcMonitor;
+        return true;
     }
 }
