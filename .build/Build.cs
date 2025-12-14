@@ -150,16 +150,30 @@ class Build : NukeBuild
 
             if (string.IsNullOrEmpty(toolsPath))
             {
-                foreach (var edition in new[] { "Enterprise", "Professional", "Community", "BuildTools", "Preview" })
+                foreach (var edition in new[] { "Enterprise", "Professional", "Community", "BuildTools", "Preview", "Insiders" })
                 {
-                    var toolPath = Path.Combine(
-                        EnvironmentInfo.SpecialFolder(SpecialFolders.ProgramFiles).NotNull("path1 != null"),
-                        $@"Microsoft Visual Studio\2022\{edition}\MSBuild\Current\Bin\amd64\msbuild.exe");
-
-                    if (File.Exists(toolPath))
                     {
-                        toolsPath = toolPath;
-                        break;
+                        var toolPath = Path.Combine(
+                            EnvironmentInfo.SpecialFolder(SpecialFolders.ProgramFiles).NotNull("path1 != null"),
+                            $@"Microsoft Visual Studio\2022\{edition}\MSBuild\Current\Bin\amd64\msbuild.exe");
+
+                        if (File.Exists(toolPath))
+                        {
+                            toolsPath = toolPath;
+                            break;
+                        }
+                    }
+
+                    {
+                        var toolPath = Path.Combine(
+                            EnvironmentInfo.SpecialFolder(SpecialFolders.ProgramFiles).NotNull("path1 != null"),
+                            $@"Microsoft Visual Studio\18\{edition}\MSBuild\Current\Bin\amd64\msbuild.exe");
+
+                        if (File.Exists(toolPath))
+                        {
+                            toolsPath = toolPath;
+                            break;
+                        }
                     }
                 }
             }
