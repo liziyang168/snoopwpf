@@ -29,7 +29,7 @@
         <PackageVersion Include="WpfAnalyzers" version="4.1.1" />
         <PackageVersion Include="PropertyChangedAnalyzers" Version="4.0.0" />
 
-        <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
+        <PackageVersion Include="GitVersion.MsBuild" Version="6.5.1" />
         <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.264" />
     </ItemGroup>
 

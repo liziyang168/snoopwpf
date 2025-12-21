@@ -63,13 +63,14 @@ class Build : NukeBuild
             throw new Exception("Could not initialize GitVersion.");
         }
 
-        Serilog.Log.Information("IsLocalBuild           : {0}", IsLocalBuild.ToString());
+        Serilog.Log.Information("IsLocalBuild      : {0}", IsLocalBuild.ToString());
 
-        Serilog.Log.Information("Informational   Version: {0}", InformationalVersion);
-        Serilog.Log.Information("SemVer          Version: {0}", SemVer);
-        Serilog.Log.Information("AssemblySemVer  Version: {0}", AssemblySemVer);
-        Serilog.Log.Information("MajorMinorPatch Version: {0}", MajorMinorPatch);
-        Serilog.Log.Information("NuGet           Version: {0}", NuGetVersion);
+        Serilog.Log.Information("Informational     : {0}", InformationalVersion);
+        Serilog.Log.Information("SemVer            : {0}", SemVer);
+        Serilog.Log.Information("FullSemVer        : {0}", FullSemVer);
+        Serilog.Log.Information("AssemblySemVer    : {0}", AssemblySemVer);
+        Serilog.Log.Information("AssemblySemFileVer: {0}", AssemblySemFileVer);
+        Serilog.Log.Information("MajorMinorPatch   : {0}", MajorMinorPatch);
     }
 
     string ProjectName = "Snoop";
@@ -84,10 +85,11 @@ class Build : NukeBuild
     [GitVersion(Framework = "net6.0", NoFetch = true, NoCache = true)]
     readonly GitVersion? GitVersion;
 
-    string AssemblySemVer => GitVersion?.AssemblySemVer ?? "1.0.0";
-    string SemVer => GitVersion?.SemVer ?? "1.0.0";
     string InformationalVersion => GitVersion?.InformationalVersion ?? "1.0.0";
-    string NuGetVersion => GitVersion?.NuGetVersion ?? "1.0.0";
+    string SemVer => GitVersion?.SemVer ?? "1.0.0";
+    string FullSemVer => GitVersion?.FullSemVer ?? "1.0.0";
+    string AssemblySemVer => GitVersion?.AssemblySemVer ?? "1.0.0";
+    string AssemblySemFileVer => GitVersion?.AssemblySemFileVer ?? "1.0.0";
     string MajorMinorPatch => GitVersion?.MajorMinorPatch ?? "1.0.0";
 
     [CI]
@@ -141,7 +143,7 @@ class Build : NukeBuild
             string toolsPath = string.Empty;
             try
             {
-                toolsPath = MSBuildToolPathResolver.Resolve(MSBuildVersion.VS2019, MSBuildPlatform.x64);
+                toolsPath = MSBuildToolPathResolver.Resolve(MSBuildVersion.VS2022, MSBuildPlatform.x64);
             }
             catch
             {
@@ -257,7 +259,7 @@ class Build : NukeBuild
 
             NuGetTasks.NuGetPack(s => s
                 .SetTargetPath(ChocolateyDirectory / $"{ProjectName}.nuspec")
-                .SetVersion(NuGetVersion)
+                .SetVersion(FullSemVer)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .EnableNoPackageAnalysis());
@@ -266,7 +268,7 @@ class Build : NukeBuild
 
             tempDirectory.CreateOrCleanDirectory();
 
-            var nupkg = ArtifactsDirectory / $"{ProjectName}.{NuGetVersion}.nupkg";
+            var nupkg = ArtifactsDirectory / $"{ProjectName}.{FullSemVer}.nupkg";
 
             CheckSumFiles.Add(nupkg);
             AppVeyor.Instance?.PushArtifact(nupkg);
@@ -274,7 +276,7 @@ class Build : NukeBuild
             {
                 nupkg.UnZipTo(tempDirectory);
 
-                var outputFile = ArtifactsDirectory / $"{ProjectName}.{NuGetVersion}.zip";
+                var outputFile = ArtifactsDirectory / $"{ProjectName}.{FullSemVer}.zip";
                 (tempDirectory / "tools").CompressTo(outputFile, info => info.Name.Contains("chocolatey") == false && info.Name != "VERIFICATION.txt");
                 CheckSumFiles.Add(outputFile);
                 AppVeyor.Instance?.PushArtifact(outputFile);
@@ -288,7 +290,7 @@ class Build : NukeBuild
         .Produces(ArtifactsDirectory / "*.msi")
         .Executes(() =>
         {
-            var outputFile = $"{ArtifactsDirectory / $"{ProjectName}.{NuGetVersion}.msi"}";
+            var outputFile = $"{ArtifactsDirectory / $"{ProjectName}.{FullSemVer}.msi"}";
             ProcessTasks.StartProcess("dotnet", $"wix build -bindpath \"{CurrentBuildOutputDirectory}\" -define ProductVersion=\"{MajorMinorPatch}\" -ext {WixUIExtension} -o \"{outputFile}\" -nologo {ProjectName}.wxs")
                 .AssertZeroExitCode();
             CheckSumFiles.Add(outputFile);
@@ -331,7 +333,7 @@ class Build : NukeBuild
         .Executes(async () =>
         {
             {
-                var outputFile = ArtifactsDirectory / $"{ProjectName}.Sign.{NuGetVersion}.zip";
+                var outputFile = ArtifactsDirectory / $"{ProjectName}.Sign.{FullSemVer}.zip";
                 ArtifactsDirectory.CompressTo(outputFile);
                 CheckSumFiles.Add(outputFile);
                 AppVeyor.Instance?.PushArtifact(outputFile);
@@ -356,7 +358,7 @@ class Build : NukeBuild
 
         return GitRepository.IsOnMainOrMasterBranch()
                // Pre-Release or not?
-               || GitVersion.NuGetVersion.Contains('-') == false;
+               || FullSemVer.Contains('-') == false;
     }
 
     // ReSharper disable once InconsistentNaming
