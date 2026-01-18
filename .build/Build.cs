@@ -259,7 +259,7 @@ class Build : NukeBuild
 
             NuGetTasks.NuGetPack(s => s
                 .SetTargetPath(ChocolateyDirectory / $"{ProjectName}.nuspec")
-                .SetVersion(FullSemVer)
+                .SetVersion(SemVer)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .EnableNoPackageAnalysis());
@@ -268,7 +268,7 @@ class Build : NukeBuild
 
             tempDirectory.CreateOrCleanDirectory();
 
-            var nupkg = ArtifactsDirectory / $"{ProjectName}.{FullSemVer}.nupkg";
+            var nupkg = ArtifactsDirectory / $"{ProjectName}.{SemVer}.nupkg";
 
             CheckSumFiles.Add(nupkg);
             AppVeyor.Instance?.PushArtifact(nupkg);
@@ -276,7 +276,7 @@ class Build : NukeBuild
             {
                 nupkg.UnZipTo(tempDirectory);
 
-                var outputFile = ArtifactsDirectory / $"{ProjectName}.{FullSemVer}.zip";
+                var outputFile = ArtifactsDirectory / $"{ProjectName}.{SemVer}.zip";
                 (tempDirectory / "tools").CompressTo(outputFile, info => info.Name.Contains("chocolatey") == false && info.Name != "VERIFICATION.txt");
                 CheckSumFiles.Add(outputFile);
                 AppVeyor.Instance?.PushArtifact(outputFile);
@@ -290,7 +290,7 @@ class Build : NukeBuild
         .Produces(ArtifactsDirectory / "*.msi")
         .Executes(() =>
         {
-            var outputFile = $"{ArtifactsDirectory / $"{ProjectName}.{FullSemVer}.msi"}";
+            var outputFile = $"{ArtifactsDirectory / $"{ProjectName}.{SemVer}.msi"}";
             ProcessTasks.StartProcess("dotnet", $"wix build -bindpath \"{CurrentBuildOutputDirectory}\" -define ProductVersion=\"{MajorMinorPatch}\" -ext {WixUIExtension} -o \"{outputFile}\" -nologo {ProjectName}.wxs")
                 .AssertZeroExitCode();
             CheckSumFiles.Add(outputFile);
@@ -333,7 +333,7 @@ class Build : NukeBuild
         .Executes(async () =>
         {
             {
-                var outputFile = ArtifactsDirectory / $"{ProjectName}.Sign.{FullSemVer}.zip";
+                var outputFile = ArtifactsDirectory / $"{ProjectName}.Sign.{SemVer}.zip";
                 ArtifactsDirectory.CompressTo(outputFile);
                 CheckSumFiles.Add(outputFile);
                 AppVeyor.Instance?.PushArtifact(outputFile);
