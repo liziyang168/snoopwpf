@@ -536,30 +536,14 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
                 return;
             }
 
-            var targetFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "SnoopTreeExport");
+            var filePath = ExportHelper.GetUniqueExportFilePath("TreeExport", "xml");
 
-            Directory.CreateDirectory(targetFolder);
-
-            using var proc = Process.GetCurrentProcess();
-            var exportDateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
-            var file = Path.Combine(targetFolder, $"{proc.ProcessName} - [{proc.Id}] ({exportDateTimeText}).xml");
-
-            // Append "(n)" suffix to avoid overwriting existing files.
-            for (var i = 1; i < 10000; i++)
+            using (var streamWriter = new StreamWriter(filePath, false, Encoding.UTF8))
             {
-                if (File.Exists(file) == false)
-                {
-                    break;
-                }
-
-                file = Path.Combine(targetFolder, $"{proc.ProcessName} - [{proc.Id}] ({exportDateTimeText}) ({i}).xml");
+                TreeExporter.Export(treeItem, streamWriter, propertyFilter, options.Recurse);
             }
 
-            using var streamWriter = new StreamWriter(file, false, Encoding.UTF8);
-
-            TreeExporter.Export(treeItem, streamWriter, propertyFilter, options.Recurse);
-
-            MessageBox.Show($"The tree has been exported to \"{file}\".", "Tree exported", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show($"The data has been exported to \"{filePath}\".", "Data exported", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         finally
         {

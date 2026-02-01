@@ -64,9 +64,9 @@ public class XMLTreeExporter
     private void ExportItem(TreeItem treeItem, XmlWriter xmlWriter, PropertyFilter? filter, bool recurse)
     {
         xmlWriter.WriteStartElement("node");
-        xmlWriter.WriteAttributeString("name", treeItem.Name);
-        xmlWriter.WriteAttributeString("displayName", treeItem.DisplayName);
-        xmlWriter.WriteAttributeString("targetType", treeItem.TargetType.FullName!);
+        xmlWriter.WriteAttributeStringEx("name", treeItem.Name);
+        xmlWriter.WriteAttributeStringEx("displayName", treeItem.DisplayName);
+        xmlWriter.WriteAttributeStringEx("targetType", treeItem.TargetType.FullName!);
 
         var propertyInformations = PropertyInformation.GetProperties(treeItem.Target);
 
@@ -83,8 +83,8 @@ public class XMLTreeExporter
                 }
 
                 xmlWriter.WriteStartElement("property");
-                xmlWriter.WriteAttributeString("displayName", propertyInformation.DisplayName);
-                xmlWriter.WriteAttributeString("value", propertyInformation.Value?.ToString() ?? "null");
+                xmlWriter.WriteAttributeStringEx("displayName", propertyInformation.DisplayName);
+                xmlWriter.WriteAttributeStringEx("value", propertyInformation.Value?.ToString() ?? "null");
                 xmlWriter.WriteEndElement();
 
                 propertyInformation.Teardown();

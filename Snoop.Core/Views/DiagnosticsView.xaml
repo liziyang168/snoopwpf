@@ -94,7 +94,7 @@
                 </controls:NoSelectionComboBox.ToolTip>
             </controls:NoSelectionComboBox>
 
-            <Button Click="ButtonBase_OnClick"
+            <Button Click="ExportDiagnostics_OnClick"
                     Content="Export" />
         </StackPanel>
 

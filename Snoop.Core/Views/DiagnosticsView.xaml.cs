@@ -7,6 +7,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -14,6 +15,7 @@ using System.Xml.Serialization;
 using JetBrains.Annotations;
 using Snoop.Data.Tree;
 using Snoop.Infrastructure.Diagnostics;
+using Snoop.Infrastructure.Helpers;
 
 public partial class DiagnosticsView
 {
@@ -245,16 +247,34 @@ public partial class DiagnosticsView
         }
     }
 
-    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+    private void ExportDiagnostics_OnClick(object sender, RoutedEventArgs e)
     {
-        var diagnosticItems = this.DiagnosticsItemsView?.Cast<DiagnosticItem>()
-            .Select(x => new DiagnosticItemData(x.Area, x.Level, x.Name, x.Description, x.SourceObject?.ToString(), TreeItemDiagnosticPathData.Build(x.TreeItem)))
-            .ToList();
-
-        if (diagnosticItems is not null)
+        if (this.DiagnosticsItemsView is null)
         {
-            var targetFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "SnoopTreeExport");
-            new XmlSerializer(typeof(List<DiagnosticItemData>)).Serialize(File.CreateText(Path.Combine(targetFolder, "diagnostics.xml")), diagnosticItems);
+            return;
+        }
+
+        Cursor saveCursor = Mouse.OverrideCursor;
+        Mouse.OverrideCursor = Cursors.Wait;
+
+        try
+        {
+            var diagnosticItems = this.DiagnosticsItemsView.Cast<DiagnosticItem>()
+                .Select(x => new DiagnosticItemData(x.Area, x.Level, x.Name, x.Description, x.SourceObject?.ToString(), TreeItemDiagnosticPathData.Build(x.TreeItem)))
+                .ToList();
+
+            var filePath = ExportHelper.GetUniqueExportFilePath("Diagnostics", "xml");
+
+            using (var streamWriter = new StreamWriter(filePath, false, Encoding.UTF8))
+            {
+                new XmlSerializer(typeof(List<DiagnosticItemData>)).Serialize(streamWriter, diagnosticItems);
+            }
+
+            MessageBox.Show($"The data has been exported to \"{filePath}\".", "Data exported", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        finally
+        {
+            Mouse.OverrideCursor = saveCursor;
         }
     }
 
@@ -303,7 +323,7 @@ public partial class DiagnosticsView
             var current = treeItem;
             while (current is not null)
             {
-                items.Add(new(treeItem.DisplayName, treeItem.TargetType.Name));
+                items.Add(new(current.DisplayName, current.TargetType.Name));
                 current = current.Parent;
             }
 
