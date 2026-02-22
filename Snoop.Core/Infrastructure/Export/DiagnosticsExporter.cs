@@ -3,6 +3,7 @@ namespace Snoop.Infrastructure;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using System.Xml.Serialization;
 using JetBrains.Annotations;
 using Snoop.Data.Tree;
@@ -15,7 +16,10 @@ public static class DiagnosticsExporter
         var dataItems = diagnosticItems
             .Select(x => new DiagnosticItemData(x.Area, x.Level, x.Name, x.Description, x.SourceObject?.ToString(), TreeItemDiagnosticPathData.Build(x.TreeItem)))
             .ToList();
-        new XmlSerializer(typeof(List<DiagnosticItemData>)).Serialize(textWriter, dataItems);
+        var serializer = new XmlSerializer(typeof(List<DiagnosticItemData>));
+        using var xmlWriter = new XmlFragmentWriter(textWriter);
+        xmlWriter.Formatting = Formatting.Indented;
+        serializer.Serialize(xmlWriter, dataItems, new([XmlQualifiedName.Empty]));
     }
 
     [PublicAPI]
