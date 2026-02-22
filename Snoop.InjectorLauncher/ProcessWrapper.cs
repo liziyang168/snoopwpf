@@ -1,4 +1,4 @@
-﻿namespace Snoop.InjectorLauncher;
+namespace Snoop.InjectorLauncher;
 
 using System;
 using System.Diagnostics;
