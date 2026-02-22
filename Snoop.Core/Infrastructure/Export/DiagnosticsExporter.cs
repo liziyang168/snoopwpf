@@ -13,8 +13,9 @@ public static class DiagnosticsExporter
     public static void Export(IEnumerable<DiagnosticItem> diagnosticItems, TextWriter textWriter)
     {
         var dataItems = diagnosticItems
-            .Select(x => new DiagnosticItemData(x.Area, x.Level, x.Name, x.Description, x.SourceObject?.ToString(), TreeItemDiagnosticPathData.Build(x.TreeItem)));
-        new XmlSerializer(typeof(IEnumerable<DiagnosticItemData>)).Serialize(textWriter, dataItems);
+            .Select(x => new DiagnosticItemData(x.Area, x.Level, x.Name, x.Description, x.SourceObject?.ToString(), TreeItemDiagnosticPathData.Build(x.TreeItem)))
+            .ToList();
+        new XmlSerializer(typeof(List<DiagnosticItemData>)).Serialize(textWriter, dataItems);
     }
 
     [PublicAPI]
