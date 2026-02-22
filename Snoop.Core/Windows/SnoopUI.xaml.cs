@@ -546,7 +546,7 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
             using (var streamWriter = new StreamWriter(filePath, false, Encoding.UTF8))
             {
-                TreeExporter.Export(treeItem, streamWriter, propertyFilter, options.Recurse);
+                TreeExporter.Export(treeItem, streamWriter, propertyFilter, options);
             }
 
             MessageBox.Show($"The data has been exported to \"{filePath}\".", "Data exported", MessageBoxButton.OK, MessageBoxImage.Information);
