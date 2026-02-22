@@ -1,7 +1,11 @@
 ﻿namespace Snoop.Infrastructure;
 
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Windows;
 using System.Xml;
 using Snoop.Data.Tree;
@@ -12,41 +16,94 @@ public static class TreeExporter
     {
         new XMLTreeExporter().Export(treeItem, textWriter, filter, recurse);
     }
+
+    public static void Export(TreeItem treeItem, TextWriter textWriter, PropertyFilter? filter, ExportOptions options)
+    {
+        new XMLTreeExporter().Export(treeItem, textWriter, filter, options);
+    }
 }
 
-public class ExportOptions : DependencyObject
+/* Without disabling these two warnings the code becomes very odd when trying to set the default value.
+    public bool UseFilter
 {
-    public static readonly DependencyProperty TreeItemProperty = DependencyProperty.Register(
-        nameof(TreeItem), typeof(TreeItem), typeof(ExportOptions), new PropertyMetadata(default(TreeItem)));
+        get; set => this.Set(ref field, value);
+    } = true;
+
+Becomes:
+    public bool UseFilter
+    {
+        get; set => this.Set(ref field, value);
+    }
+
+    = true;
+*/
+#pragma warning disable SA1513 // Closing brace should be followed by blank line
+#pragma warning disable SA1500 // Braces for multi-line statements should not share line
+
+public class ExportOptions : BaseNotifyObject
+{
+    public bool UseFilter
+    {
+        get; set => this.Set(ref field, value);
+    }
 
     public TreeItem? TreeItem
     {
-        get { return (TreeItem?)this.GetValue(TreeItemProperty); }
-        set { this.SetValue(TreeItemProperty, value); }
+        get; set => this.Set(ref field, value);
     }
-
-    public static readonly DependencyProperty UseFilterProperty = DependencyProperty.Register(
-        nameof(UseFilter), typeof(bool), typeof(ExportOptions), new PropertyMetadata(true));
-
-    public bool UseFilter
-    {
-        get { return (bool)this.GetValue(UseFilterProperty); }
-        set { this.SetValue(UseFilterProperty, value); }
-    }
-
-    public static readonly DependencyProperty RecurseProperty = DependencyProperty.Register(
-        nameof(Recurse), typeof(bool), typeof(ExportOptions), new PropertyMetadata(false));
 
     public bool Recurse
     {
-        get { return (bool)this.GetValue(RecurseProperty); }
-        set { this.SetValue(RecurseProperty, value); }
+        get; set => this.Set(ref field, value);
     }
+
+    public bool ExportXamlStyle
+    {
+        get; set => this.Set(ref field, value);
+    } = true;
+
+    public bool IncludeDefaultEmptyValues
+    {
+        get; set => this.Set(ref field, value);
+    } = false;
+
+    public bool IncludeTypenameOnlyValues
+    {
+        get; set => this.Set(ref field, value);
+    } = false;
+
+    public bool IncludeSystemCollectionNamespaceValues
+    {
+        get; set => this.Set(ref field, value);
+    } = false;
+
+    public bool RoundDecimals
+    {
+        get; set => this.Set(ref field, value);
+    } = true;
 }
+#pragma warning restore SA1513 // Closing brace should be followed by blank line
+#pragma warning restore SA1500 // Braces for multi-line statements should not share line
 
 public class XMLTreeExporter
 {
-    public void Export(TreeItem treeItem, TextWriter textWriter, PropertyFilter? filter, bool recurse)
+    private static bool IsSimpleType(Type type) => type.IsPrimitive || type == typeof(decimal) || type == typeof(DateTime) || type == typeof(DateTimeOffset) || type == typeof(TimeSpan) || type == typeof(Guid);
+
+    private static readonly Dictionary<Type, object?> defaultValueCache = new();
+
+    public void Export(TreeItem treeItem, TextWriter textWriter, PropertyFilter? filter, bool recurse = true)
+    {
+        var options = new ExportOptions
+        {
+            Recurse = recurse,
+            ExportXamlStyle = true,
+            RoundDecimals = true,
+            IncludeDefaultEmptyValues = false
+        };
+        this.Export(treeItem, textWriter, filter, options);
+    }
+
+    public void Export(TreeItem treeItem, TextWriter textWriter, PropertyFilter? filter, ExportOptions options)
     {
         var writerSettings = new XmlWriterSettings
         {
@@ -57,22 +114,33 @@ public class XMLTreeExporter
 
         using var xmlWriter = XmlWriter.Create(textWriter, writerSettings);
         xmlWriter.WriteStartDocument(true);
-        this.ExportItem(treeItem, xmlWriter, filter, recurse);
+        this.ExportItem(treeItem, xmlWriter, filter, options);
         xmlWriter.WriteEndDocument();
     }
 
-    private void ExportItem(TreeItem treeItem, XmlWriter xmlWriter, PropertyFilter? filter, bool recurse)
+    private void ExportItem(TreeItem treeItem, XmlWriter xmlWriter, PropertyFilter? filter, ExportOptions options)
+    {
+        if (!options.ExportXamlStyle)
     {
         xmlWriter.WriteStartElement("node");
         xmlWriter.WriteAttributeString("name", treeItem.Name);
         xmlWriter.WriteAttributeString("displayName", treeItem.DisplayName);
         xmlWriter.WriteAttributeString("targetType", treeItem.TargetType.FullName!);
+        }
+        else
+        {
+            var elementName = GetValidXmlName(treeItem.TargetType.Name);
+            xmlWriter.WriteStartElement(elementName);
+        }
 
         var propertyInformations = PropertyInformation.GetProperties(treeItem.Target);
 
         if (propertyInformations.Any())
         {
+            if (!options.ExportXamlStyle)
+        {
             xmlWriter.WriteStartElement("properties");
+            }
 
             foreach (var propertyInformation in propertyInformations)
             {
@@ -82,25 +150,117 @@ public class XMLTreeExporter
                     continue;
                 }
 
+                var rawVal = propertyInformation.Value;
+                if (options.IncludeDefaultEmptyValues == false)
+                {
+                    var skipValue = false;
+                    skipValue |= rawVal is null;
+                    skipValue |= rawVal is string strVal && string.IsNullOrEmpty(strVal);
+                    if (!skipValue && IsSimpleType(propertyInformation.PropertyType.Type))
+                    {
+                        if (!defaultValueCache.TryGetValue(propertyInformation.PropertyType.Type, out var defaultValue))
+                        {
+                            defaultValueCache[propertyInformation.PropertyType.Type] = defaultValue = Activator.CreateInstance(propertyInformation.PropertyType.Type);
+                        }
+
+                        if (rawVal!.Equals(defaultValue))
+                        {
+                            skipValue = true;
+                        }
+                    }
+
+                    if (!skipValue && !options.IncludeSystemCollectionNamespaceValues)
+                    {
+                        var typeNamespace = propertyInformation.PropertyType.Type.Namespace ?? string.Empty;
+                        if (typeNamespace.StartsWith("System.Collections", StringComparison.Ordinal))
+                        {
+                            skipValue = true;
+                        }
+                    }
+
+                    if (skipValue)
+                    {
+                        propertyInformation.Teardown();
+                        continue;
+                    }
+                }
+
+                if (rawVal == null)
+                {
+                    rawVal = "null";
+                }
+
+                string? value;
+                if (options.RoundDecimals)
+                {
+                    value = rawVal switch
+                    {
+                        double d => d.ToString("0.#"),
+                        float f => f.ToString("0.#"),
+                        decimal m => m.ToString("0.#"),
+                        Size sz => $"{sz.Width:0.#}x{sz.Height:0.#}",
+                        Point pt => $"({pt.X:0.#},{pt.Y:0.#})",
+                        Thickness thick => $"{(thick.Left == thick.Right && thick.Right == thick.Top && thick.Top == thick.Bottom ? thick.Left.ToString("0.#") : $"{thick.Left:0.#},{thick.Top:0.#},{thick.Right:0.#},{thick.Bottom:0.#}")}",
+                        System.Windows.Media.Geometry geo => $"{geo?.GetOutlinedPathGeometry()?.Figures?.Count} Geo Figures",
+                        _ => rawVal.ToString()
+                    };
+                }
+                else
+                {
+                    value = rawVal.ToString()!;
+                }
+
+                if (options.IncludeTypenameOnlyValues == false)
+                {
+#pragma warning disable CA1307 // Specify StringComparison for clarity
+                    if (value!.Contains('.') && value == propertyInformation.PropertyType.Type.FullName)
+                    {
+                        propertyInformation.Teardown();
+                        continue;
+                    }
+#pragma warning restore CA1307 // Specify StringComparison for clarity
+                }
+
+                if (!options.ExportXamlStyle)
+                {
                 xmlWriter.WriteStartElement("property");
                 xmlWriter.WriteAttributeString("displayName", propertyInformation.DisplayName);
-                xmlWriter.WriteAttributeString("value", propertyInformation.Value?.ToString() ?? "null");
+                    xmlWriter.WriteAttributeString("value", value);
                 xmlWriter.WriteEndElement();
+                }
+                else
+                {
+                    var attributeName = GetValidXmlName(propertyInformation.DisplayName);
+                    xmlWriter.WriteAttributeString(attributeName, value);
+                }
 
                 propertyInformation.Teardown();
             }
 
+            if (!options.ExportXamlStyle)
+            {
             xmlWriter.WriteEndElement();
         }
+        }
 
-        if (recurse)
+        if (options.Recurse)
         {
             foreach (var treeItemChild in treeItem.Children)
             {
-                this.ExportItem(treeItemChild, xmlWriter, filter, recurse);
+                this.ExportItem(treeItemChild, xmlWriter, filter, options);
             }
         }
 
         xmlWriter.WriteEndElement();
+    }
+
+    private static string GetValidXmlName(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return "Element";
+        }
+
+        return XmlConvert.EncodeLocalName(name);
     }
 }
