@@ -112,7 +112,11 @@ public class PropertyInformation : DependencyObject, IComparable, INotifyPropert
 
         BindingMode GetBindingMode()
         {
-            return property.IsReadOnly ? BindingMode.OneWay : BindingMode.TwoWay;
+            var targetSupportsNotifications = target is INotifyPropertyChanged;
+
+            return property.IsReadOnly
+                ? targetSupportsNotifications ? BindingMode.OneWay : BindingMode.OneTime
+                : BindingMode.TwoWay;
         }
     }
 
@@ -704,10 +708,10 @@ public class PropertyInformation : DependencyObject, IComparable, INotifyPropert
                     this.isInvalidBinding = true;
 
 #if USE_WPF_BINDING_DIAG
-                        if (BindingDiagnosticHelper.Instance.TryGetEntry(expression, out var failedBinding))
-                        {
-                            this.BindingError = failedBinding.Messages;
-                        }
+                    if (BindingDiagnosticHelper.Instance.TryGetEntry(expression, out var failedBinding))
+                    {
+                        this.BindingError = failedBinding.Messages;
+                    }
 #endif
                 }
             }

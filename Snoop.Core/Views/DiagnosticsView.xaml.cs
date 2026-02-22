@@ -1,4 +1,4 @@
-﻿namespace Snoop.Views;
+namespace Snoop.Views;
 
 using System;
 using System.Collections.ObjectModel;
@@ -198,7 +198,7 @@ public partial class DiagnosticsView
             return false;
         }
 
-        if (diagnosticItem.DiagnosticProvider?.IsActive == false)
+        if (diagnosticItem.DiagnosticProvider.IsActive is false)
         {
             return false;
         }

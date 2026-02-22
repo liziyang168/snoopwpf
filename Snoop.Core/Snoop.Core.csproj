@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <TargetFrameworks>$(MinCoreTargetFramework);$(MinTargetFramework)</TargetFrameworks>
-
+    <LangVersion>14.0</LangVersion>
     <RootNamespace>Snoop</RootNamespace>
 
     <UseWpf>true</UseWpf>
-    <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);PInvoke009</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +26,8 @@
     <PackageReference Include="microsoft.powershell.3.referenceassemblies" PrivateAssets="All" Condition="'$(TargetFramework)' == '$(MinTargetFramework)'" />
 
     <PackageReference Include="System.Management.Automation" PrivateAssets="All" Condition="'$(TargetFramework)' != '$(MinTargetFramework)'" />
+
+    <PackageReference Include="Microsoft.Windows.CsWin32" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' != '$(MinTargetFramework)'">
