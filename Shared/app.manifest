@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <asmv1:assembly manifestVersion="1.0"
                 xmlns="urn:schemas-microsoft-com:asm.v1"
                 xmlns:asmv1="urn:schemas-microsoft-com:asm.v1"
@@ -41,6 +41,8 @@
             <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2, PerMonitor, System</dpiAwareness>
             <!-- If you want to see Windows crash with a kernel error trap, enable gdiScaling -->
             <!--<gdiScaling xmlns="http://schemas.microsoft.com/SMI/2017/WindowsSettings">true</gdiScaling>-->
+            <!-- Enables native ARM64 support https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests#supportedarchitectures -->
+            <supportedArchitectures xmlns="http://schemas.microsoft.com/SMI/2024/WindowsSettings">amd64 arm64</supportedArchitectures>
         </windowsSettings>
     </application>
 
