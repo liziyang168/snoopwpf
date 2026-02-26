@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<ArrayOfDiagnosticItemData>
+  <DiagnosticItemData>
+    <Area>Misc</Area>
+    <Level>Info</Level>
+    <Name>Freeze freezables</Name>
+    <Description>You should freeze freezable to save memory and increase performance.</Description>
+    <TreeItemPath>
+      <TreeItemDiagnosticPathData>
+        <DisplayName> (StackPanel)</DisplayName>
+        <TypeName>StackPanel</TypeName>
+      </TreeItemDiagnosticPathData>
+    </TreeItemPath>
+  </DiagnosticItemData>
+</ArrayOfDiagnosticItemData>

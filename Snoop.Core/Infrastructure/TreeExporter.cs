@@ -1,4 +1,4 @@
-﻿namespace Snoop.Infrastructure;
+namespace Snoop.Infrastructure;
 
 using System;
 using System.Collections.Generic;
@@ -12,11 +12,6 @@ using Snoop.Infrastructure.Helpers;
 
 public static class TreeExporter
 {
-    public static void Export(TreeItem treeItem, TextWriter textWriter, PropertyFilter? filter, bool recurse = true)
-    {
-        new XMLTreeExporter().Export(treeItem, textWriter, filter, recurse);
-    }
-
     public static void Export(TreeItem treeItem, TextWriter textWriter, PropertyFilter? filter, ExportOptions options)
     {
         new XMLTreeExporter().Export(treeItem, textWriter, filter, options);
@@ -97,17 +92,6 @@ public class XMLTreeExporter
 {
     private static readonly Dictionary<Type, object?> defaultValueCache = new();
 
-    private static bool IsSimpleType(Type type)
-    {
-        return type.IsPrimitive || type == typeof(decimal) || type == typeof(DateTime) || type == typeof(DateTimeOffset) || type == typeof(TimeSpan) || type == typeof(Guid);
-    }
-
-    public void Export(TreeItem treeItem, TextWriter textWriter, PropertyFilter? filter, bool recurse = true)
-    {
-        var options = new ExportOptions { Recurse = recurse, ExportXamlStyle = true, RoundDecimals = true, IncludeDefaultEmptyValues = false };
-        this.Export(treeItem, textWriter, filter, options);
-    }
-
     public void Export(TreeItem treeItem, TextWriter textWriter, PropertyFilter? filter, ExportOptions options)
     {
         var writerSettings = new XmlWriterSettings { Encoding = textWriter.Encoding, Indent = true, NewLineOnAttributes = false };
@@ -116,6 +100,11 @@ public class XMLTreeExporter
         xmlWriter.WriteStartDocument(true);
         this.ExportItem(treeItem, xmlWriter, filter, options);
         xmlWriter.WriteEndDocument();
+    }
+
+    private static bool IsSimpleType(Type type)
+    {
+        return type.IsPrimitive || type == typeof(decimal) || type == typeof(DateTime) || type == typeof(DateTimeOffset) || type == typeof(TimeSpan) || type == typeof(Guid);
     }
 
     private void ExportItem(TreeItem treeItem, XmlWriter xmlWriter, PropertyFilter? filter, ExportOptions options)

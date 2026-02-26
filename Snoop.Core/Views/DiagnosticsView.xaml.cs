@@ -1,15 +1,18 @@
-namespace Snoop.Views;
+﻿namespace Snoop.Views;
 
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using Snoop.Infrastructure;
 using Snoop.Infrastructure.Diagnostics;
+using Snoop.Infrastructure.Helpers;
 
 public partial class DiagnosticsView
 {
@@ -238,6 +241,33 @@ public partial class DiagnosticsView
         if (diagnosticItem?.TreeItem != null)
         {
             diagnosticItem.TreeItem.IsSelected = true;
+        }
+    }
+
+    private void ExportDiagnostics_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (this.DiagnosticsItemsView is null)
+        {
+            return;
+        }
+
+        Cursor saveCursor = Mouse.OverrideCursor;
+        Mouse.OverrideCursor = Cursors.Wait;
+
+        try
+        {
+            var filePath = ExportHelper.GetUniqueExportFilePath("Diagnostics", "xml");
+
+            using (var streamWriter = new StreamWriter(filePath, false, Encoding.UTF8))
+            {
+                DiagnosticsExporter.Export(this.DiagnosticsItemsView.Cast<DiagnosticItem>(), streamWriter);
+            }
+
+            MessageBox.Show($"The data has been exported to \"{filePath}\".", "Data exported", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        finally
+        {
+            Mouse.OverrideCursor = saveCursor;
         }
     }
 }

@@ -53,27 +53,24 @@ public static class SignPathTasks2
         string projectSlug,
         string signingPolicySlug)
     {
-        using (SwitchSecurityProtocol())
+        var contentType = "application/json";
+        var content = new
         {
-            var contentType = "application/json";
-            var content = new
-                          {
-                              AppVeyor.Instance.AccountName,
-                              AppVeyor.Instance.ProjectSlug,
-                              AppVeyor.Instance.BuildVersion,
-                              AppVeyor.Instance.BuildId,
-                              AppVeyor.Instance.JobId
-                          };
+            AppVeyor.Instance.AccountName,
+            AppVeyor.Instance.ProjectSlug,
+            AppVeyor.Instance.BuildVersion,
+            AppVeyor.Instance.BuildId,
+            AppVeyor.Instance.JobId
+        };
 
-            using var httpClient = CreateAuthorizedHttpClient(authToken, DefaultHttpClientTimeout);
-            var response = await httpClient.PostAsync(
-                GetSignPathAppVeyorIntegrationUrl(organizationId, projectSlug, signingPolicySlug),
-                new StringContent(content.ToJson(), Encoding.UTF8, contentType));
-            response.AssertStatusCode(HttpStatusCode.Created);
+        using var httpClient = CreateAuthorizedHttpClient(authToken, DefaultHttpClientTimeout);
+        var response = await httpClient.PostAsync(
+            GetSignPathAppVeyorIntegrationUrl(organizationId, projectSlug, signingPolicySlug),
+            new StringContent(content.ToJson(), Encoding.UTF8, contentType));
+        response.AssertStatusCode(HttpStatusCode.Created);
 
-            Log.Information("Signing request created: {Url}", response.Headers.Location!.AbsoluteUri.Replace("api/v1", "Web"));
-            return response.Headers.Location.AbsoluteUri;
-        }
+        Log.Information("Signing request created: {Url}", response.Headers.Location!.AbsoluteUri.Replace("api/v1", "Web"));
+        return response.Headers.Location.AbsoluteUri;
     }
 
     // static void SubmitSigningRequest(
@@ -120,21 +117,18 @@ public static class SignPathTasks2
         string signingRequestUrl,
         AbsolutePath outputPath)
     {
-        using (SwitchSecurityProtocol())
-        {
-            var defaultHttpClient = CreateAuthorizedHttpClient(apiToken, DefaultHttpClientTimeout);
-            var downloadUrl = GetSignedArtifactUrl(defaultHttpClient, signingRequestUrl);
-            Log.Information("Signed artifact is available: {DownloadUrl}", downloadUrl);
+        var defaultHttpClient = CreateAuthorizedHttpClient(apiToken, DefaultHttpClientTimeout);
+        var downloadUrl = GetSignedArtifactUrl(defaultHttpClient, signingRequestUrl);
+        Log.Information("Signed artifact is available: {DownloadUrl}", downloadUrl);
 
-            var downloadHttpClient = CreateAuthorizedHttpClient(apiToken, UploadAndDownloadRequestTimeout);
-            using var response = SendGetRequestWithRetry(downloadHttpClient, downloadUrl);
-            var downloadStream = await response.Content.ReadAsStreamAsync();
+        var downloadHttpClient = CreateAuthorizedHttpClient(apiToken, UploadAndDownloadRequestTimeout);
+        using var response = SendGetRequestWithRetry(downloadHttpClient, downloadUrl);
+        var downloadStream = await response.Content.ReadAsStreamAsync();
 
-            outputPath.Parent.CreateDirectory();
-            using var fileStream = File.Open(outputPath, FileMode.Create);
-            await downloadStream.CopyToAsync(fileStream);
-            Log.Information("Signed artifact downloaded to: {OutputPath}", outputPath);
-        }
+        outputPath.Parent.CreateDirectory();
+        using var fileStream = File.Open(outputPath, FileMode.Create);
+        await downloadStream.CopyToAsync(fileStream);
+        Log.Information("Signed artifact downloaded to: {OutputPath}", outputPath);
     }
 
     private static string GetSignedArtifactUrl(HttpClient httpClient, string signingRequestUrl)
@@ -162,11 +156,6 @@ public static class SignPathTasks2
             logAction: Log.Debug);
 
         return signedArtifactUrl.NotNull($"Signing Request {signingRequestStatus}")!;
-    }
-
-    private static IDisposable SwitchSecurityProtocol()
-    {
-        return DelegateDisposable.SetAndRestore(() => ServicePointManager.SecurityProtocol, SecurityProtocolType.Tls12);
     }
 
     private static HttpClient CreateAuthorizedHttpClient(string apiToken, TimeSpan timeout)
