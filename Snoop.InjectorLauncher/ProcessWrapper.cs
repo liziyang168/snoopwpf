@@ -92,9 +92,20 @@ public class ProcessWrapper
         {
 #if DEBUG
             Injector.LogMessage(module.szExePath);
-            var fileVersionInfo = FileVersionInfo.GetVersionInfo(module.szExePath);
-            Injector.LogMessage($"File: {fileVersionInfo.FileVersion}");
-            Injector.LogMessage($"Prod: {fileVersionInfo.ProductVersion}");
+            try
+            {
+                var fileVersionInfo = FileVersionInfo.GetVersionInfo(module.szExePath);
+                Injector.LogMessage($"File: {fileVersionInfo.FileVersion}");
+                Injector.LogMessage($"Prod: {fileVersionInfo.ProductVersion}");
+            }
+            catch
+            {
+                // Some virus scanners (e.g. SentinelOne) have kernel mode drivers that
+                // may load non-existent modules into the process memory (e.g. Ntd1l.dll
+                // and Kern3l.dll ... notice the unconventional spelling). Those file
+                // do not exist on disk and the above will fail. As we only log the version
+                // info in debug builds for diagnostics, we simply ignore the errors.
+            }
 #endif
 
             if (module.szModule.StartsWith("wpfgfx_", StringComparison.OrdinalIgnoreCase))

@@ -7,6 +7,7 @@
   - [#477](../../issues/477) - Binding Errors - Get error message
   - [#483](../../issues/483) - Error when I try to GetBindingExpression from TextProperty
   - [#484](../../issues/484) - Snoop fails to attach to application running on .NET Framework on ARM64
+  - [#488](../../issues/488) - Cannot attach to processes with DLLs without physical files (thanks @todor-dk)
   - [#489](../../issues/489) - Cannot snoop app compiled with <SelfContained> set to true.
 
 - ### Improvements
