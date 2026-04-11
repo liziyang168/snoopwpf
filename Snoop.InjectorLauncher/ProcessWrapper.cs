@@ -85,8 +85,7 @@ public class ProcessWrapper
     {
         var modules = NativeMethods.GetModules(process);
 
-        FileVersionInfo? systemRuntimeVersion = null;
-        FileVersionInfo? wpfGFXVersion = null;
+        FileVersionInfo? coreclrVersion = null;
 
         foreach (var module in modules)
         {
@@ -108,49 +107,23 @@ public class ProcessWrapper
             }
 #endif
 
-            if (module.szModule.StartsWith("wpfgfx_", StringComparison.OrdinalIgnoreCase))
+            if (module.szModule.Equals("coreclr.dll", StringComparison.OrdinalIgnoreCase))
             {
-                wpfGFXVersion = FileVersionInfo.GetVersionInfo(module.szExePath);
-            }
-            else if (module.szModule.StartsWith("System.Runtime.dll", StringComparison.OrdinalIgnoreCase))
-            {
-                systemRuntimeVersion = FileVersionInfo.GetVersionInfo(module.szExePath);
+                coreclrVersion = FileVersionInfo.GetVersionInfo(module.szExePath);
             }
         }
 
-        var relevantVersionInfo = systemRuntimeVersion
-            ?? wpfGFXVersion;
-
-        if (relevantVersionInfo is null)
+        if (coreclrVersion is null)
         {
             return "net462";
         }
 
-        var productVersion = TryParseVersion(relevantVersionInfo.ProductVersion ?? string.Empty);
-        return productVersion.Major switch
+        var productVersion = coreclrVersion.ProductMajorPart;
+        return productVersion switch
         {
             >= 6 => "net6.0-windows",
             4 => "net462",
-            _ => throw new NotSupportedException($".NET version {relevantVersionInfo.ProductVersion} is not supported.")
+            _ => throw new NotSupportedException($".NET version {coreclrVersion.ProductVersion} is not supported.")
         };
-    }
-
-    private static Version TryParseVersion(string version)
-    {
-        var versionToParse = version;
-
-        var previewVersionMarkerIndex = versionToParse.IndexOfAny(new[] { '-', '+' });
-
-        if (previewVersionMarkerIndex > -1)
-        {
-            versionToParse = version.Substring(0, previewVersionMarkerIndex);
-        }
-
-        if (Version.TryParse(versionToParse, out var parsedVersion))
-        {
-            return parsedVersion;
-        }
-
-        return new Version();
     }
 }
