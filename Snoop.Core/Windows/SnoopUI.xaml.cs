@@ -60,8 +60,6 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
         this.InitializeComponent();
 
-        PresentationTraceSourcesHelper.RefreshAndEnsureRequiredLevel();
-
         this.CommandBindings.Add(new(ApplicationCommands.Close, (_, _) => this.Close()));
 
         this.CommandBindings.Add(new CommandBinding(IntrospectCommand, this.HandleIntrospection));

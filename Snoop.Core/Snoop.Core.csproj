@@ -31,6 +31,6 @@
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' != '$(MinTargetFramework)'">
-    <DefineConstants>$(DefineConstants);USE_WPF_BINDING_DIAG</DefineConstants>
+    <!--<DefineConstants>$(DefineConstants);USE_WPF_BINDING_DIAG</DefineConstants>-->
   </PropertyGroup>
 </Project>
