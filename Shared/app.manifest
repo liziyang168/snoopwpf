@@ -19,15 +19,15 @@
     <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
         <application>
             <!-- A list of all Windows versions that this application is designed to work with. Windows will automatically select the most compatible environment.-->
-            <!--The ID below indicates application support for Windows Vista -->
+            <!-- Windows Vista -->
             <supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}"/>
-            <!--The ID below indicates application support for Windows 7 -->
+            <!-- Windows 7 -->
             <supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}"/>
-            <!--The ID below indicates application support for Windows 8 -->
+            <!-- Windows 8 -->
             <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}"/>
-            <!--The ID below indicates application support for Windows 8.1 -->
+            <!-- Windows 8.1 -->
             <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}"/>
-            <!--The ID below indicates application support for Windows 10 -->
+            <!-- Windows 10 and later -->
             <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}"/>
         </application>
     </compatibility>
@@ -41,6 +41,8 @@
             <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2, PerMonitor, System</dpiAwareness>
             <!-- If you want to see Windows crash with a kernel error trap, enable gdiScaling -->
             <!--<gdiScaling xmlns="http://schemas.microsoft.com/SMI/2017/WindowsSettings">true</gdiScaling>-->
+            <!-- Enables native ARM64 support https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests#supportedarchitectures -->
+            <supportedArchitectures xmlns="http://schemas.microsoft.com/SMI/2024/WindowsSettings">amd64 arm64</supportedArchitectures>
         </windowsSettings>
     </application>
 

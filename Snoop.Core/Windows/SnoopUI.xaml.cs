@@ -60,8 +60,6 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
         this.InitializeComponent();
 
-        PresentationTraceSourcesHelper.RefreshAndEnsureRequiredLevel();
-
         this.CommandBindings.Add(new(ApplicationCommands.Close, (_, _) => this.Close()));
 
         this.CommandBindings.Add(new CommandBinding(IntrospectCommand, this.HandleIntrospection));
@@ -80,7 +78,7 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
         this.CommandBindings.Add(new CommandBinding(CopyPropertyChangesCommand, this.CopyPropertyChangesHandler));
 
-        InputManager.Current.PreProcessInput += this.HandlePreProcessInput;
+        InputManager.Current.PreProcessInput += this.HandlePreProcessInputForTracking;
         this.Tree.SelectedItemChanged += this.HandleTreeSelectedItemChanged;
 
         this.filterTimer = new DispatcherTimer
@@ -317,12 +315,12 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
     #endregion
 
-    // ReSharper disable once InconsistentNaming
-    public bool IsHandlingCTRL_SHIFT { get; set; } = true;
+    public bool TrackOnMouseMove { get; set; } = true;
+
+    public bool TrackOnClick { get; set; } = false;
 
     public bool IgnoreHitTestVisibility { get; set; } = true;
 
-    // ReSharper disable once InconsistentNaming
     public bool SkipTemplateParts { get; set; } = false;
 
     /// <summary>Identifies the <see cref="CurrentTreeType"/> dependency property.</summary>
@@ -432,7 +430,7 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
         CacheManager.Instance.DecreaseUsageCount();
 
-        InputManager.Current.PreProcessInput -= this.HandlePreProcessInput;
+        InputManager.Current.PreProcessInput -= this.HandlePreProcessInputForTracking;
 
         this.filterTimer.Stop();
 
@@ -528,6 +526,12 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
             var options = (ExportOptions)e.Parameter;
             var propertyFilter = options.UseFilter ? this.PropertyGrid.PropertyFilter : null;
 
+            options.ExportXamlStyle = TreeItem.DefaultExportOptions.ExportXamlStyle;
+            options.IncludeDefaultEmptyValues = TreeItem.DefaultExportOptions.IncludeDefaultEmptyValues;
+            options.IncludeTypenameOnlyValues = TreeItem.DefaultExportOptions.IncludeTypenameOnlyValues;
+            options.IncludeSystemCollectionNamespaceValues = TreeItem.DefaultExportOptions.IncludeSystemCollectionNamespaceValues;
+            options.RoundDecimals = TreeItem.DefaultExportOptions.RoundDecimals;
+
             var treeItem = options.TreeItem ?? this.CurrentSelection;
 
             if (treeItem is null)
@@ -536,30 +540,14 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
                 return;
             }
 
-            var targetFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "SnoopTreeExport");
+            var filePath = ExportHelper.GetUniqueExportFilePath("TreeExport", "xml");
 
-            Directory.CreateDirectory(targetFolder);
-
-            using var proc = Process.GetCurrentProcess();
-            var exportDateTimeText = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
-            var file = Path.Combine(targetFolder, $"{proc.ProcessName} - [{proc.Id}] ({exportDateTimeText}).xml");
-
-            // Append "(n)" suffix to avoid overwriting existing files.
-            for (var i = 1; i < 10000; i++)
+            using (var streamWriter = new StreamWriter(filePath, false, Encoding.UTF8))
             {
-                if (File.Exists(file) == false)
-                {
-                    break;
-                }
-
-                file = Path.Combine(targetFolder, $"{proc.ProcessName} - [{proc.Id}] ({exportDateTimeText}) ({i}).xml");
+                TreeExporter.Export(treeItem, streamWriter, propertyFilter, options);
             }
 
-            using var streamWriter = new StreamWriter(file, false, Encoding.UTF8);
-
-            TreeExporter.Export(treeItem, streamWriter, propertyFilter, options.Recurse);
-
-            MessageBox.Show($"The tree has been exported to \"{file}\".", "Tree exported", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show($"The data has been exported to \"{filePath}\".", "Data exported", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         finally
         {
@@ -633,22 +621,43 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
 
     #region Private Event Handlers
 
-    private void HandlePreProcessInput(object sender, PreProcessInputEventArgs e)
+    private bool IsTrackingInput(PreProcessInputEventArgs e)
+    {
+        // "Track on click"
+        if (this.TrackOnClick
+            && e.StagingItem.Input is MouseButtonEventArgs mouseButtonEventArgs
+            && mouseButtonEventArgs.RoutedEvent == Mouse.PreviewMouseDownEvent
+            && mouseButtonEventArgs.ChangedButton is MouseButton.Left)
+        {
+            return true;
+        }
+
+        // "Track on mouse move"
+        if (this.TrackOnMouseMove
+            && ((e.StagingItem.Input is MouseEventArgs mouseEventArgs
+                && mouseEventArgs.RoutedEvent == Mouse.PreviewMouseMoveEvent)
+            // in addition to mouse movements we have to handle cases where the user just hovers over an element and then presses CTRL + SHIFT
+            || (e.StagingItem.Input is KeyEventArgs keyEventArgs
+                && keyEventArgs.RoutedEvent == Keyboard.PreviewKeyDownEvent
+                && keyEventArgs.Key is Key.LeftCtrl or Key.RightCtrl or Key.LeftShift or Key.RightShift)))
+        {
+            var currentModifiers = InputManager.Current.PrimaryKeyboardDevice.Modifiers;
+
+            var isControlPressed = currentModifiers.HasFlag(ModifierKeys.Control);
+            var isShiftPressed = currentModifiers.HasFlag(ModifierKeys.Shift);
+
+            return isControlPressed is true
+                   && isShiftPressed is true;
+        }
+
+        return false;
+    }
+
+    private void HandlePreProcessInputForTracking(object sender, PreProcessInputEventArgs e)
     {
         this.OnPropertyChanged(nameof(this.CurrentFocus));
 
-        if (this.IsHandlingCTRL_SHIFT == false)
-        {
-            return;
-        }
-
-        var currentModifiers = InputManager.Current.PrimaryKeyboardDevice.Modifiers;
-
-        var isControlPressed = currentModifiers.HasFlag(ModifierKeys.Control);
-        var isShiftPressed = currentModifiers.HasFlag(ModifierKeys.Shift);
-
-        if (isControlPressed == false
-            || isShiftPressed == false)
+        if (this.IsTrackingInput(e) is false)
         {
             return;
         }

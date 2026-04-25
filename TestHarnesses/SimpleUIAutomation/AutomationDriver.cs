@@ -11,7 +11,7 @@
     using System.Windows.Controls.Primitives;
     using System.Windows.Media;
 
-    public class AutomationDriver
+    public static class AutomationDriver
     {
         public static int StartAutomation(string settingsFile)
         {

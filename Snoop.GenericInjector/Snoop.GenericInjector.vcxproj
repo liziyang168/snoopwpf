@@ -4,7 +4,7 @@
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
     <RootBuild Condition="'$(RootBuild)' == ''">True</RootBuild>
-    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">3.0.0.0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">6.0.0.0</AssemblyVersion>
     <InformationalVersion Condition="'$(InformationalVersion)' == ''">$(AssemblyVersion)</InformationalVersion>
     <MajorVersion>$([System.Version]::Parse($(AssemblyVersion)).Major)</MajorVersion>
     <MinorVersion>$([System.Version]::Parse($(AssemblyVersion)).Minor)</MinorVersion>
@@ -40,14 +40,6 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|ARM">
-      <Configuration>Debug</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|ARM">
-      <Configuration>Release</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|ARM64">
       <Configuration>Debug</Configuration>
       <Platform>ARM64</Platform>
@@ -73,13 +65,18 @@
   </PropertyGroup>
   <Import Condition="Exists('$(VCTargetsPath)\Microsoft.Cpp.Default.props')" Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
+    <v143_Installed Condition="Exists('$(VCTargetsPath)\Platforms\Win32\PlatformToolsets\v143\Toolset.props')">true</v143_Installed>
+    <v144_Installed Condition="Exists('$(VCTargetsPath)\Platforms\Win32\PlatformToolsets\v144\Toolset.props')">true</v144_Installed>
+    <v145_Installed Condition="Exists('$(VCTargetsPath)\Platforms\Win32\PlatformToolsets\v145\Toolset.props')">true</v145_Installed>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <PlatformToolset Condition="'$(v143_Installed)' == 'true'">v143</PlatformToolset>
+    <PlatformToolset Condition="'$(v144_Installed)' == 'true'">v144</PlatformToolset>
+    <PlatformToolset Condition="'$(v145_Installed)' == 'true'">v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <!--<EnableASAN Condition="'$(Platform)' != 'ARM' And '$(Platform)' != 'ARM64'">true</EnableASAN>-->
+    <!--<EnableASAN Condition="'$(Platform)' != 'ARM64'">true</EnableASAN>-->
     <LinkIncremental>false</LinkIncremental>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
@@ -101,8 +98,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Release'">NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Platform)'=='Win32'">WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Platform)'=='ARM'">NO_FULL_FRAMEWORK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Platform)'=='ARM64'">NO_FULL_FRAMEWORK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+<!--      <PreprocessorDefinitions Condition="'$(Platform)'=='ARM64'">NO_FULL_FRAMEWORK;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
@@ -129,7 +125,7 @@
   <ItemGroup>
     <ClInclude Include="FrameworkExecutor.h" />
     <ClInclude Include="NetExecutor.h" />
-    <ClInclude Condition="'$(Platform)' != 'ARM' And '$(Platform)' != 'ARM64'" Include="NetFrameworkExecutor.h" />
+    <ClInclude Include="NetFrameworkExecutor.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="LogHelper.h" />
     <ClInclude Include="pch.h" />
@@ -140,7 +136,7 @@
     <ClCompile Include="Executor.cpp" />
     <ClCompile Include="LogHelper.cpp" />
     <ClCompile Include="NetExecutor.cpp" />
-    <ClCompile Condition="'$(Platform)' != 'ARM' And '$(Platform)' != 'ARM64'" Include="NetFrameworkExecutor.cpp" />
+    <ClCompile Include="NetFrameworkExecutor.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="pch.cpp" />
   </ItemGroup>

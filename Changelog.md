@@ -1,5 +1,24 @@
 ﻿# Changelog for Snoop
 
+## 6.1.0 (preview)
+
+- ### Bug fixes
+
+  - [#477](../../issues/477) - Binding Errors - Get error message
+  - [#483](../../issues/483) - Error when I try to GetBindingExpression from TextProperty
+  - [#484](../../issues/484) - Snoop fails to attach to application running on .NET Framework on ARM64
+  - [#488](../../issues/488) - Cannot attach to processes with DLLs without physical files (thanks @todor-dk)
+  - [#489](../../issues/489) - Cannot snoop app compiled with <SelfContained> set to true.
+  - [#499](../../issues/499) - Injector detects Visual Studio 2026 incorrectly
+
+- ### Improvements
+
+  - [#457](../../issues/457) - [Quality of Life] Synchronize Zoomer instance background slider value.
+  - [#482](../../issues/482) - Add "Auto-track on click" option (thanks @Koichi-Kobayashi)
+  - [#485](../../issues/485) - Snoop running on ARM hardware is using x64 emulation instead of the native Arm64
+  - [#487](../../issues/487) - [Feature Request] Allow to copy or export the list of Diagnostics
+  - [#496](../../issues/496) - More export options, compact XAML form (thanks @mitchcapper)
+
 ## 6.0.0
 
 - ### Breaking changes

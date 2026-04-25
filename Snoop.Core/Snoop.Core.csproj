@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;$(MinTargetFramework)</TargetFrameworks>
-
+    <TargetFrameworks>$(MinCoreTargetFramework);$(MinTargetFramework)</TargetFrameworks>
+    <LangVersion>14.0</LangVersion>
     <RootNamespace>Snoop</RootNamespace>
 
     <UseWpf>true</UseWpf>
-    <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);PInvoke009</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,10 +25,12 @@
     <Reference Include="System.Configuration" Condition="'$(TargetFramework)' == '$(MinTargetFramework)'" />
     <PackageReference Include="microsoft.powershell.3.referenceassemblies" PrivateAssets="All" Condition="'$(TargetFramework)' == '$(MinTargetFramework)'" />
 
-    <PackageReference Include="System.Management.Automation" PrivateAssets="All" Condition="'$(TargetFramework)' == 'net6.0-windows'" />
+    <PackageReference Include="System.Management.Automation" PrivateAssets="All" Condition="'$(TargetFramework)' != '$(MinTargetFramework)'" />
+
+    <PackageReference Include="Microsoft.Windows.CsWin32" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0-windows'">
-    <DefineConstants>$(DefineConstants);USE_WPF_BINDING_DIAG</DefineConstants>
+  <PropertyGroup Condition="'$(TargetFramework)' != '$(MinTargetFramework)'">
+    <!--<DefineConstants>$(DefineConstants);USE_WPF_BINDING_DIAG</DefineConstants>-->
   </PropertyGroup>
 </Project>

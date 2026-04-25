@@ -138,21 +138,22 @@
                               Click="HandleResetSettings_OnClick" />
                 </MenuItem>
                 <MenuItem Header="_Tracking options">
-                    <MenuItem x:Name="CtrlShiftMenuItem"
-                              Header="Handle CTRL + _SHIFT"
+                    <MenuItem Header="Track on mouse move when CTRL + _SHIFT is pressed"
                               IsCheckable="True"
-                              IsChecked="{Binding IsHandlingCTRL_SHIFT}"
-                              ToolTip="When enabled and pressed tracks all parts of the UI." />
+                              IsChecked="{Binding TrackOnMouseMove}"
+                              ToolTip="When enabled and CTRL + _SHIFT is pressed tracks all parts of the UI." />
+                    <MenuItem Header="Track on click"
+                              IsCheckable="True"
+                              IsChecked="{Binding TrackOnClick}"
+                              ToolTip="When enabled, automatically tracks UI elements when left clicked." />
                     <MenuItem Header="Skip template parts"
                               IsCheckable="True"
                               IsChecked="{Binding SkipTemplateParts}"
-                              IsEnabled="{Binding ElementName=CtrlShiftMenuItem, Path=IsChecked}"
-                              ToolTip="When enabled: CTRL + SHIFT tries to skip template parts." />
-                    <MenuItem Header="CTRL + SHIFT selects hit test invisible"
+                              ToolTip="When enabled: Tracking tries to skip template parts." />
+                    <MenuItem Header="Ignore hit test visibility"
                               IsCheckable="True"
                               IsChecked="{Binding IgnoreHitTestVisibility}"
-                              IsEnabled="{Binding ElementName=CtrlShiftMenuItem, Path=IsChecked}"
-                              ToolTip="When enabled: CTRL + SHIFT also selects UI elements that are have IsHitTestVisible set to false" />
+                              ToolTip="When enabled: Tracking also selects UI elements that are have IsHitTestVisible set to false." />
                     <Separator />
                     <MenuItem Header="Highlight selected item"
                               IsCheckable="True"

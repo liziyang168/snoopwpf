@@ -85,61 +85,45 @@ public class ProcessWrapper
     {
         var modules = NativeMethods.GetModules(process);
 
-        FileVersionInfo? systemRuntimeVersion = null;
-        FileVersionInfo? wpfGFXVersion = null;
+        FileVersionInfo? coreclrVersion = null;
 
         foreach (var module in modules)
         {
 #if DEBUG
             Injector.LogMessage(module.szExePath);
-            var fileVersionInfo = FileVersionInfo.GetVersionInfo(module.szExePath);
-            Injector.LogMessage($"File: {fileVersionInfo.FileVersion}");
-            Injector.LogMessage($"Prod: {fileVersionInfo.ProductVersion}");
+            try
+            {
+                var fileVersionInfo = FileVersionInfo.GetVersionInfo(module.szExePath);
+                Injector.LogMessage($"File: {fileVersionInfo.FileVersion}");
+                Injector.LogMessage($"Prod: {fileVersionInfo.ProductVersion}");
+            }
+            catch
+            {
+                // Some virus scanners (e.g. SentinelOne) have kernel mode drivers that
+                // may load non-existent modules into the process memory (e.g. Ntd1l.dll
+                // and Kern3l.dll ... notice the unconventional spelling). Those file
+                // do not exist on disk and the above will fail. As we only log the version
+                // info in debug builds for diagnostics, we simply ignore the errors.
+            }
 #endif
 
-            if (module.szModule.StartsWith("wpfgfx_", StringComparison.OrdinalIgnoreCase))
+            if (module.szModule.Equals("coreclr.dll", StringComparison.OrdinalIgnoreCase))
             {
-                wpfGFXVersion = FileVersionInfo.GetVersionInfo(module.szExePath);
-            }
-            else if (module.szModule.StartsWith("System.Runtime.dll", StringComparison.OrdinalIgnoreCase))
-            {
-                systemRuntimeVersion = FileVersionInfo.GetVersionInfo(module.szExePath);
+                coreclrVersion = FileVersionInfo.GetVersionInfo(module.szExePath);
             }
         }
 
-        var relevantVersionInfo = systemRuntimeVersion
-            ?? wpfGFXVersion;
-
-        if (relevantVersionInfo is null)
+        if (coreclrVersion is null)
         {
             return "net462";
         }
 
-        var productVersion = TryParseVersion(relevantVersionInfo.ProductVersion ?? string.Empty);
-        return productVersion.Major switch
+        var productVersion = coreclrVersion.ProductMajorPart;
+        return productVersion switch
         {
             >= 6 => "net6.0-windows",
             4 => "net462",
-            _ => throw new NotSupportedException($".NET version {relevantVersionInfo.ProductVersion} is not supported.")
+            _ => throw new NotSupportedException($".NET version {coreclrVersion.ProductVersion} is not supported.")
         };
-    }
-
-    private static Version TryParseVersion(string version)
-    {
-        var versionToParse = version;
-
-        var previewVersionMarkerIndex = versionToParse.IndexOfAny(new[] { '-', '+' });
-
-        if (previewVersionMarkerIndex > -1)
-        {
-            versionToParse = version.Substring(0, previewVersionMarkerIndex);
-        }
-
-        if (Version.TryParse(versionToParse, out var parsedVersion))
-        {
-            return parsedVersion;
-        }
-
-        return new Version();
     }
 }

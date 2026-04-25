@@ -1,7 +1,7 @@
 ﻿namespace Snoop.Infrastructure.Helpers;
 
 using System;
-using System.Windows.Forms;
+using System.Windows;
 using Snoop.Windows;
 
 public static class ClipboardHelper

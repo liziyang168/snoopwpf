@@ -263,7 +263,7 @@ public partial class MethodsControl
             else
             {
                 this.resultProperties.Visibility = Visibility.Visible;
-                this.propertyInspector.RootTarget = returnValue;
+                this.propertyInspector.Target = returnValue;
             }
         }
         catch (Exception exception)

@@ -35,7 +35,7 @@
             sb.Seek(this.podClock, now.TimeOfDay, TimeSeekOrigin.BeginTime);
         }
 
-        private void OnDayChange(object sender, EventArgs e)
+        private void OnDayChange(object? sender, EventArgs e)
         {
             // date has changed, update the datacontext to reflect today's date
             var now = DateTime.Now;

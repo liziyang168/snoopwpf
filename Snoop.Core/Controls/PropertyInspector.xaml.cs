@@ -203,6 +203,12 @@ public partial class PropertyInspector : INotifyPropertyChanged
 
     private static void HandleTargetChanged(PropertyInspector inspector, object? oldValue, object? newValue)
     {
+        // We don't keep a stack if there is no root target
+        if (inspector.RootTarget is null)
+        {
+            return;
+        }
+
         if (newValue is not null)
         {
             inspector.inspectStack.Add(newValue);
