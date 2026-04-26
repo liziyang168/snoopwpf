@@ -1,8 +1,8 @@
 # http://www.appveyor.com/docs/appveyor-yml
 branches:
   only:
-    - master
     - develop
+    - master
     - /v\d*\.\d*\.\d*/
 
 image: Visual Studio 2022
