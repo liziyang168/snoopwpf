@@ -4,6 +4,7 @@
 
 - ### Bug fixes
 
+  - [#501](../../issues/501) - Hittest not working when FlowDirection="RightToLeft"
   - [#503](../../issues/503) - Snoop no longer prompts for administrator privileges
  
 ## 6.1.0

@@ -22,13 +22,16 @@ namespace Snoop.Infrastructure;
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml.Serialization;
 using global::Windows.Win32;
 using global::Windows.Win32.Foundation;
+using global::Windows.Win32.UI.WindowsAndMessaging;
 
 public static partial class NativeMethods
 {
@@ -256,21 +259,58 @@ public static partial class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool UnhookWindowsHookEx(IntPtr hhk);
 
+    [DllImport("user32.dll", EntryPoint = "GetWindowLongW", SetLastError = true)]
+    private static extern IntPtr GetWindowLongPtr32(IntPtr hWnd, WINDOW_LONG_PTR_INDEX nIndex);
+
+    [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW", SetLastError = true)]
+    private static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, WINDOW_LONG_PTR_INDEX nIndex);
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static IntPtr GetWindowLongPtr(IntPtr hwnd, WINDOW_LONG_PTR_INDEX nIndex)
+    {
+        var ret = IntPtr.Size == 8
+            ? GetWindowLongPtr64(hwnd, nIndex)
+            : GetWindowLongPtr32(hwnd, nIndex);
+
+        if (ret == IntPtr.Zero)
+        {
+            throw new Win32Exception();
+        }
+
+        return ret;
+    }
+
     /// <summary>
     /// Try to get the relative mouse position to the given handle in client coordinates.
     /// </summary>
-    /// <param name="hWnd">The handle for this method.</param>
+    /// <param name="hwnd">The handle for this method.</param>
     /// <param name="point">The relative mouse position to the given handle.</param>
-    public static unsafe bool TryGetRelativeMousePosition(IntPtr hWnd, out POINT point)
+    public static unsafe bool TryGetRelativeMousePosition(IntPtr hwnd, out POINT point)
     {
         point = default;
 
-        var returnValue = hWnd != IntPtr.Zero
+        var returnValue = hwnd != IntPtr.Zero
                           && TryGetPhysicalCursorPos(out point);
 
         if (returnValue)
         {
-            ScreenToClient(hWnd, ref point);
+            if (ScreenToClient(hwnd, ref point) is false)
+            {
+                return false;
+            }
+
+            if (((WINDOW_EX_STYLE)(long)GetWindowLongPtr(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE) & WINDOW_EX_STYLE.WS_EX_LAYOUTRTL) == WINDOW_EX_STYLE.WS_EX_LAYOUTRTL)
+            {
+                global::Windows.Win32.Foundation.RECT rc;
+                if (PInvoke.GetClientRect(new HWND(hwnd), &rc) == false)
+                {
+                    return false;
+                }
+
+                // rc.left is always 0, rc.right is the client width.
+                // Mirror X back. Use (right - 1 - x).
+                point.X = (rc.right - 1) - point.X;
+            }
         }
 
         return returnValue;
