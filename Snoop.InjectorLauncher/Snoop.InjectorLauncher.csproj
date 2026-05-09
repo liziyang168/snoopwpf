@@ -7,7 +7,9 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 
     <RollForward>Major</RollForward> <!-- can be removed as soon as we build with net6.0 -->
-    
+
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
     <ApplicationIcon>..\Artwork\Snoop.ico</ApplicationIcon>
     <ApplicationManifest>../Shared/app.manifest</ApplicationManifest>
   </PropertyGroup>
@@ -30,7 +32,9 @@
     <Compile Include="..\Snoop.Core\EnvironmentEx.cs">
       <Link>EnvironmentEx.cs</Link>
     </Compile>
-    <Compile Include="..\Snoop.Core\Infrastructure\NativeMethods.cs" Link="NativeMethods.cs" />
+    <Compile Include="..\Snoop.Core\Infrastructure\ConsoleHelper.cs" Link="ConsoleHelper.cs" />
+    <Compile Include="..\Snoop.Core\Infrastructure\NativeMethods.Memory.cs" Link="NativeMethods.Memory.cs" />
+    <Compile Include="..\Snoop.Core\Infrastructure\NativeMethods.Process.cs" Link="NativeMethods.Process.cs" />
     <Compile Include="..\Snoop.Core\Infrastructure\LogHelper.cs" Link="LogHelper.cs" />
     <Compile Include="..\Snoop.Core\SettingsHelper.cs">
       <Link>SettingsHelper.cs</Link>

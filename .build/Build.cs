@@ -257,12 +257,8 @@ class Build : NukeBuild
                 using var _ = File.Create(launcher + ".ignore");
             }
 
-            NuGetTasks.NuGetPack(s => s
-                .SetTargetPath(ChocolateyDirectory / $"{ProjectName}.nuspec")
-                .SetVersion(SemVer)
-                .SetConfiguration(Configuration)
-                .SetOutputDirectory(ArtifactsDirectory)
-                .EnableNoPackageAnalysis());
+            ProcessTasks.StartProcess("choco", $"pack \"{ChocolateyDirectory / $"{ProjectName}.nuspec"}\" --version {SemVer} configuration={Configuration} --outputdirectory \"{ArtifactsDirectory}\"")
+                .AssertZeroExitCode();
 
             var tempDirectory = TemporaryDirectory / $"{ProjectName}{nameof(Pack)}";
 

@@ -9,6 +9,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <licenseUrl>https://raw.githubusercontent.com/snoopwpf/snoopwpf/master/License.txt</licenseUrl>
     <projectUrl>https://github.com/snoopwpf/snoopwpf/</projectUrl>
+    <packageSourceUrl>https://github.com/snoopwpf/snoopwpf/</packageSourceUrl>
     <iconUrl>https://github.com/snoopwpf/snoopwpf/raw/master/Artwork/Snoop.ico</iconUrl>
     <description>
     Snoop allows you to spy/browse the visual tree of a running WPF application (without the need for a debugger) ... and change properties ... amongst other things.
