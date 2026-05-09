@@ -1,5 +1,11 @@
 ﻿# Changelog for Snoop
 
+## 6.1.1 (preview)
+
+- ### Bug fixes
+
+  - [#503](../../issues/503) - Snoop no longer prompts for administrator privileges
+ 
 ## 6.1.0
 
 - ### Bug fixes

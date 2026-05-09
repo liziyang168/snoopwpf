@@ -63,14 +63,12 @@ Snoop requires this component, which is part of the Snoop project, to do it's jo
             var commandLine = Parser.Default.FormatCommandLine(injectorLauncherCommandLineOptions);
             var processStartInfo = new ProcessStartInfo(injectorLauncherExe, commandLine)
             {
-                UseShellExecute = false,
+                UseShellExecute = true,
                 CreateNoWindow = true,
                 WindowStyle = Program.Debug ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden,
                 Verb = processInfo.IsProcessElevated
                     ? "runas"
-                    : null,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true
+                    : null
             };
 
             LogHelper.WriteLine($"Launching injector \"{processStartInfo.FileName}\".");
@@ -79,29 +77,8 @@ Snoop requires this component, which is part of the Snoop project, to do it's jo
             using var process = new Process();
             process.StartInfo = processStartInfo;
 
-            // Subscribe to output streams
-            process.OutputDataReceived += (_, args) =>
-            {
-                if (args.Data is not null)
-                {
-                    LogHelper.WriteLine($"[Injector Output] {args.Data}");
-                }
-            };
-
-            process.ErrorDataReceived += (_, args) =>
-            {
-                if (args.Data is not null)
-                {
-                    LogHelper.WriteLine($"[Injector Error] {args.Data}");
-                }
-            };
-
             if (process.Start())
             {
-                // Begin reading output/error streams asynchronously
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
                 process.WaitForExit();
 
                 LogHelper.WriteLine($"Injector returned exit code: {process.ExitCode}.");
