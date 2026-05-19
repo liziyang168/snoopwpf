@@ -40,6 +40,7 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
     public static readonly RoutedCommand SelectFocusScopeCommand = new(nameof(SelectFocusScopeCommand), typeof(SnoopUI));
     public static readonly RoutedCommand ClearSearchFilterCommand = new(nameof(ClearSearchFilterCommand), typeof(SnoopUI));
     public static readonly RoutedCommand CopyPropertyChangesCommand = new(nameof(CopyPropertyChangesCommand), typeof(SnoopUI));
+    public static readonly RoutedCommand ScopeToCommand = new(nameof(ScopeToCommand), typeof(SnoopUI));
 
     #endregion
 
@@ -65,6 +66,7 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
         this.CommandBindings.Add(new CommandBinding(IntrospectCommand, this.HandleIntrospection));
         this.CommandBindings.Add(new CommandBinding(RefreshCommand, this.HandleRefresh));
         this.CommandBindings.Add(new CommandBinding(ExportTreeWithFilterCommand, this.HandleExport));
+        this.CommandBindings.Add(new CommandBinding(ScopeToCommand, this.HandleScopeTo));
         this.CommandBindings.Add(new CommandBinding(HelpCommand, this.HandleHelp));
 
         this.CommandBindings.Add(new CommandBinding(InspectCommand, this.HandleInspect));
@@ -480,7 +482,7 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
             this.SystemResourcesTreeItem = (SystemResourcesTreeItem)new SystemResourcesTreeItem(null, this.TreeService).Reload();
 
             this.RootTreeItem?.Dispose();
-            this.RootTreeItem = this.TreeService.Construct(this.RootObject!, null);
+            this.RootTreeItem = this.TreeService.Construct(this.ScopedRootObject ?? this.RootObject!, null, isScoped: this.ScopedRootObject is not null);
 
             this.TreeService.DiagnosticContext.AnalyzeTree();
 
@@ -553,6 +555,22 @@ public sealed partial class SnoopUI : INotifyPropertyChanged
         {
             Mouse.OverrideCursor = saveCursor;
         }
+    }
+
+    private void HandleScopeTo(object sender, ExecutedRoutedEventArgs e)
+    {
+        var item = (e.Parameter as TreeItem)?.Target;
+        if (e.Parameter is not TreeItem treeItem)
+        {
+            this.Unscope();
+        }
+        else
+        {
+            this.ScopeTo(treeItem.Target);
+            this.CurrentSelection = treeItem;
+        }
+
+        this.Refresh();
     }
 
     private void HandleHelp(object sender, ExecutedRoutedEventArgs e)
