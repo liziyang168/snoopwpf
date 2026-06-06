@@ -25,25 +25,21 @@
 
     <file src="..\bin\$Configuration$\Snoop.Core*.config" target="tools\" />
     <file src="..\bin\$Configuration$\Snoop.Core*.dll" target="tools\" />
-    <file src="..\bin\$Configuration$\Snoop.Core*.pdb" target="tools\" />
     <file src="..\bin\$Configuration$\Snoop.Core*.json" target="tools\" />
 
     <file src="..\bin\$Configuration$\Snoop.exe" target="tools\" />
     <file src="..\bin\$Configuration$\Snoop.exe.config" target="tools\" />
-    <file src="..\bin\$Configuration$\Snoop.pdb" target="tools\" />
     <file src="..\bin\$Configuration$\Snoop.com" target="tools\" />
     <file src="..\bin\$Configuration$\Snoop.com.config" target="tools\" />
 
     <file src="..\bin\$Configuration$\CommandLine.dll" target="tools\" />
     
-    <file src="..\bin\$Configuration$\net462\Snoop.Core*.config" target="tools\net462\" />
-    <file src="..\bin\$Configuration$\net462\Snoop.Core*.dll" target="tools\net462\" />
-    <file src="..\bin\$Configuration$\net462\Snoop.Core*.pdb" target="tools\net462\" />
-    <file src="..\bin\$Configuration$\net462\System.Management.Automation.dll" target="tools\net462\" />
+    <file src="..\bin\$Configuration$\net48\Snoop.Core*.config" target="tools\net48\" />
+    <file src="..\bin\$Configuration$\net48\Snoop.Core*.dll" target="tools\net48\" />
+    <file src="..\bin\$Configuration$\net48\System.Management.Automation.dll" target="tools\net48\" />
 
     <file src="..\bin\$Configuration$\net6.0-windows\Snoop.Core*.config" target="tools\net6.0-windows\" />
     <file src="..\bin\$Configuration$\net6.0-windows\Snoop.Core*.dll" target="tools\net6.0-windows\" />
-    <file src="..\bin\$Configuration$\net6.0-windows\Snoop.Core*.pdb" target="tools\net6.0-windows\" />
     <file src="..\bin\$Configuration$\net6.0-windows\Snoop.Core*.json" target="tools\net6.0-windows\" />
 
     <file src="..\bin\$Configuration$\Snoop.GenericInjector.*.dll" target="tools\" />
@@ -51,18 +47,15 @@
 
     <file src="..\bin\$Configuration$\Snoop.InjectorLauncher.x86.exe" target="tools\" />
     <file src="..\bin\$Configuration$\Snoop.InjectorLauncher.x86.exe.config" target="tools\" />
-    <file src="..\bin\$Configuration$\Snoop.InjectorLauncher.x86.pdb" target="tools\" />
 
     <file src="..\bin\$Configuration$\Snoop.InjectorLauncher.x64.exe" target="tools\" />
     <file src="..\bin\$Configuration$\Snoop.InjectorLauncher.x64.exe.config" target="tools\" />
-    <file src="..\bin\$Configuration$\Snoop.InjectorLauncher.x64.pdb" target="tools\" />
 
     <file src="..\bin\$Configuration$\Snoop.InjectorLauncher.ARM64.dll" target="tools\" />
     <file src="..\bin\$Configuration$\Snoop.InjectorLauncher.ARM64.dll.config" target="tools\" />
     <file src="..\bin\$Configuration$\Snoop.InjectorLauncher.ARM64.deps.json" target="tools\" />
     <file src="..\bin\$Configuration$\Snoop.InjectorLauncher.ARM64.runtimeconfig.json" target="tools\" />
     <file src="..\bin\$Configuration$\Snoop.InjectorLauncher.ARM64.exe" target="tools\" />
-    <file src="..\bin\$Configuration$\Snoop.InjectorLauncher.ARM64.pdb" target="tools\" />
 
     <file src="..\bin\$Configuration$\*.ignore" target="tools\" />
     <file src="..\bin\$Configuration$\*.gui" target="tools\" />

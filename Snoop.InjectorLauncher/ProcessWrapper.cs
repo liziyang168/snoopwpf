@@ -115,14 +115,14 @@ public class ProcessWrapper
 
         if (coreclrVersion is null)
         {
-            return "net462";
+            return "net48";
         }
 
         var productVersion = coreclrVersion.ProductMajorPart;
         return productVersion switch
         {
             >= 6 => "net6.0-windows",
-            4 => "net462",
+            4 => "net48",
             _ => throw new NotSupportedException($".NET version {coreclrVersion.ProductVersion} is not supported.")
         };
     }

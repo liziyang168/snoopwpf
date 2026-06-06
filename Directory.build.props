@@ -11,7 +11,7 @@
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 
         <PlatformTarget>AnyCPU</PlatformTarget>
-        <MinTargetFramework>net462</MinTargetFramework>
+        <MinTargetFramework>net48</MinTargetFramework>
         <MinCoreTargetFramework>net6.0-windows</MinCoreTargetFramework>
         <CheckEolTargetFramework>false</CheckEolTargetFramework>
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
@@ -22,7 +22,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <LangVersion>10</LangVersion>
+        <LangVersion>14</LangVersion>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <Nullable>enable</Nullable>
         <NoWarn>$(NoWarn);NU1503;NETSDK1138;NETSDK1222;MSB3277;CA1021;CA1063;CA1816</NoWarn>
@@ -63,6 +63,6 @@
     <PropertyGroup>
         <!-- We should switch "DebugType" to "portable" in the future -->
         <!-- "Full" and "pdbonly" are the same according to https://github.com/dotnet/roslyn/blob/master/docs/compilers/CSharp/CommandLine.md -->
-        <DebugType>full</DebugType>
+        <DebugType>Embedded</DebugType>
     </PropertyGroup>
 </Project>

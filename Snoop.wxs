@@ -18,8 +18,8 @@
 
         <Feature Id="ProductFeature" Title="Snoop" Description="Snoop, the WPF Spying Utility" Level="1"
                  ConfigurableDirectory="INSTALLDIR">
-            <Files Directory="net462" Include="net462/Snoop.*" />
-            <Files Directory="net462" Include="net462/System.Management.Automation.dll" />
+            <Files Directory="net48" Include="net48/Snoop.*" />
+            <Files Directory="net48" Include="net48/System.Management.Automation.dll" />
 
             <Files Directory="net60" Include="net6.0-windows/Snoop.*" />
 
@@ -37,7 +37,6 @@
             <Files Include="Snoop.InjectorLauncher.*.dll.config" />
             <Files Include="Snoop.InjectorLauncher.*.exe" />
             <Files Include="Snoop.InjectorLauncher.*.exe.config" />
-            <Files Include="Snoop.InjectorLauncher.*.pdb" />
 
             <Files Include="Snoop.Core.*" />
 
@@ -49,7 +48,6 @@
             </File>
 
             <Files Include="Snoop.exe.config" />
-            <Files Include="Snoop.pdb" />
             <Files Include="Snoop.com" />
             <Files Include="Snoop.com.config" />
 
@@ -58,7 +56,7 @@
 
         <StandardDirectory Id="ProgramFilesFolder">
             <Directory Id="INSTALLDIR" Name="Snoop">
-                <Directory Id="net462" Name="net462" />
+                <Directory Id="net48" Name="net48" />
                 <Directory Id="net60" Name="net6.0-windows" />
 
                 <Directory Id="SnoopScriptsFolder" Name="Scripts">

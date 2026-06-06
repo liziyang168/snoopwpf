@@ -2,8 +2,6 @@
   <Import Project="../Directory.build.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>$(MinCoreTargetFramework);$(MinTargetFramework)</TargetFrameworks>
     <OutputPath>$(MSBuildThisFileDirectory)\bin\$(MSBuildProjectName)\$(Configuration)\</OutputPath>
-    <DebugType>embedded</DebugType>
   </PropertyGroup>
 </Project>
