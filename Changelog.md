@@ -1,5 +1,11 @@
 ﻿# Changelog for Snoop
 
+## 6.2.0 (preview)
+
+- ### Improvements
+
+  - [#504](../../issues/504) - Allow to scope the treeview to an element (thanks @Laniusexcubitor)
+
 ## 6.1.1
 
 - ### Bug fixes
