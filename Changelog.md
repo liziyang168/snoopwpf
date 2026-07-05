@@ -2,6 +2,10 @@
 
 ## 6.2.0 (preview)
 
+- ### Bug fixes
+
+  - [#507](../../issues/507) - Snooping a .NET 11 app throws an error
+
 - ### Improvements
 
   - [#504](../../issues/504) - Allow to scope the treeview to an element (thanks @Laniusexcubitor)

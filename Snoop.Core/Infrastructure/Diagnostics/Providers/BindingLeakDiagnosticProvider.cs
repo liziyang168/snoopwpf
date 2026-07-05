@@ -104,7 +104,18 @@ public class BindingLeakDiagnosticProvider : DiagnosticProvider
             return null;
         }
 
-        var propertyCache = (Hashtable?)propertyCacheFieldInfo.GetValue(null);
+        Hashtable? propertyCache = null;
+        var propertyCacheFieldValue = propertyCacheFieldInfo.GetValue(null);
+
+        if (propertyCacheFieldValue is Hashtable hashtable)
+        {
+            propertyCache = hashtable;
+        }
+        else if (propertyCacheFieldValue?.GetType() is { Name: "CollectibleKeyHashtable" } collectibleKeyHashtableType
+                 && collectibleKeyHashtableType.GetField("_defaultTable", BindingFlags.Instance | BindingFlags.NonPublic) is { } defaultTableFieldInfo)
+        {
+            propertyCache = (Hashtable?)defaultTableFieldInfo.GetValue(propertyCacheFieldValue);
+        }
 
         if (propertyCache is null)
         {
@@ -115,7 +126,7 @@ public class BindingLeakDiagnosticProvider : DiagnosticProvider
 
         // try to make a copy of the hashtable as quickly as possible (this object can be accessed by other threads)
 
-        DictionaryEntry[] entries = new DictionaryEntry[propertyCache.Count];
+        var entries = new DictionaryEntry[propertyCache.Count];
         propertyCache.CopyTo(entries, 0);
 
         // count the "value changed" handlers for each type
