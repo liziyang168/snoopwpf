@@ -1,6 +1,6 @@
 ﻿# Changelog for Snoop
 
-## 6.1.1 (preview)
+## 6.1.1
 
 - ### Bug fixes
 
